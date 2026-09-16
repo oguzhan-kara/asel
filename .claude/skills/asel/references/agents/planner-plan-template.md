@@ -2,7 +2,7 @@
 
 Create a step-by-step plan:
 
-```markdown
+````markdown
 # Implementation Plan: STORY-NNN - [Title]
 
 ## Goal
@@ -268,7 +268,7 @@ If no mocks directory or story has no backend API endpoints → write "No mock r
 
 ## Risks & Mitigations
 - [Risk 1]: [Mitigation]
-```
+````
 
 ### 3. Pre-Validation & Quality Gate (Before Writing Plan)
 

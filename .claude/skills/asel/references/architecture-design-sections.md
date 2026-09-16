@@ -242,7 +242,7 @@ Define the complete Docker setup from day one.
 - `/health` → Backend health check
 - This ensures single origin, no CORS issues, and clean URL structure.
 
-```markdown
+````markdown
 ## Docker Architecture
 
 ### Port Check
@@ -303,7 +303,7 @@ services:
 | JWT_SECRET | app | Token signing key | [generated] |
 | REDIS_URL | app | Redis connection | redis://redis:6379 |
 | NODE_ENV | app | Environment | production |
-```
+````
 
 ### 6. Component Architecture (Frontend)
 

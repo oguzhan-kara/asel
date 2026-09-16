@@ -2,7 +2,7 @@
 
 After architecture design is complete, generate a project `README.md` at the project root:
 
-```markdown
+````markdown
 # [Project Name]
 
 [1-2 sentence description]
@@ -38,7 +38,7 @@ make help
 
 ## Deployment
 [Docker deployment instructions]
-```
+````
 
 Adapt sections to actual project stack and structure.
 
