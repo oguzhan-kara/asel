@@ -58,7 +58,7 @@ const DEFAULTS = {
   },
 };
 
-const POST_EVENTS = new Set(['PostToolUse', 'PostToolUseFailure', 'PermissionRequest']);
+const BLOCKING_EVENTS = new Set(['PreToolUse', 'Stop']);
 
 function isObj(v) { return v && typeof v === 'object' && !Array.isArray(v); }
 
@@ -70,15 +70,19 @@ function deepMerge(base, over) {
 }
 
 function readJson(file) {
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return {}; }
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
 }
 
 function loadConfig(cwd, home = os.homedir()) {
+  const warnings = [];
   const candidates = [path.join(cwd, 'asel.config.json'), path.join(home, '.claude', 'asel.config.json')];
   for (const file of candidates) {
-    if (fs.existsSync(file)) return { config: deepMerge(DEFAULTS, readJson(file)), source: file };
+    if (!fs.existsSync(file)) continue;
+    const json = readJson(file);
+    if (json === null) { warnings.push(`${file}: invalid JSON, ignored`); continue; }
+    return { config: deepMerge(DEFAULTS, json), source: file, warnings };
   }
-  return { config: deepMerge(DEFAULTS, {}), source: 'defaults' };
+  return { config: deepMerge(DEFAULTS, {}), source: 'defaults', warnings };
 }
 
 function guard(config, name, event) {
@@ -86,7 +90,7 @@ function guard(config, name, event) {
   if (!g) return { enabled: false, level: 'warn', note: '' };
   let level = g.level === 'block' ? 'block' : 'warn';
   let note = '';
-  if (level === 'block' && POST_EVENTS.has(event)) {
+  if (level === 'block' && !BLOCKING_EVENTS.has(event)) {
     level = 'warn';
     note = `asel: guard "${name}" cannot block on ${event}; downgraded to warn`;
   }

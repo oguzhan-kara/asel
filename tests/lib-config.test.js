@@ -46,4 +46,24 @@ test('guard downgrades block to warn on PostToolUse and reports note', () => {
   assert.match(g2.note, /cannot block on PostToolUse/);
   assert.strictEqual(guard(DEFAULTS, 'storyDoneGuard', 'PreToolUse').level, 'block');
   assert.strictEqual(guard(DEFAULTS, 'nope', 'PreToolUse').enabled, false);
+  assert.strictEqual(guard(DEFAULTS, 'storyDoneGuard', 'SessionStart').level, 'warn');
+  assert.strictEqual(guard(DEFAULTS, 'stopCheck', 'Stop').level, 'warn');
+  assert.strictEqual(guard(deepMerge(DEFAULTS, { guards: { stopCheck: { level: 'block' } } }), 'stopCheck', 'Stop').level, 'block');
+});
+
+test('loadConfig skips invalid JSON files with warnings', () => {
+  const home = tmp(); const proj = tmp();
+  fs.mkdirSync(path.join(home, '.claude'));
+  fs.writeFileSync(path.join(home, '.claude', 'asel.config.json'), JSON.stringify({ language: { conversation: 'en' } }));
+  fs.writeFileSync(path.join(proj, 'asel.config.json'), '{ not json');
+  let r = loadConfig(proj, home);
+  assert.strictEqual(r.source, path.join(home, '.claude', 'asel.config.json'));
+  assert.strictEqual(r.warnings.length, 1);
+  assert.match(r.warnings[0], /invalid JSON/);
+
+  const proj2 = tmp();
+  fs.writeFileSync(path.join(proj2, 'asel.config.json'), '{ not json');
+  r = loadConfig(proj2, tmp());
+  assert.strictEqual(r.source, 'defaults');
+  assert.strictEqual(r.warnings.length, 1);
 });
