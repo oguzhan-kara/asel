@@ -5,11 +5,12 @@ const path = require('path');
 const CORE_STEPS = ['PLAN', 'DEV', 'GATE', 'REVIEW', 'COMMIT'];
 const ARTIFACT_SUFFIX = /-(plan|gate|review|step-log)\.(md|txt)$/;
 
-function listFiles(dir, out = [], base = dir) {
+/** Recursively lists absolute file paths under dir; [] when dir is missing. */
+function listFiles(dir, out = []) {
   if (!fs.existsSync(dir)) return out;
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, e.name);
-    if (e.isDirectory()) listFiles(full, out, base);
+    if (e.isDirectory()) listFiles(full, out);
     else out.push(full);
   }
   return out;
@@ -30,7 +31,10 @@ function findStoryFile(cwd, paths, storyId) {
 function findGateReport(cwd, paths, storyId) {
   const dirs = [path.join(cwd, paths.stories), path.join(cwd, paths.reports), path.join(cwd, paths.docs)];
   for (const d of dirs) {
-    const hit = listFiles(d).find((f) => path.basename(f).startsWith(storyId) && /gate/i.test(path.basename(f)));
+    const hit = listFiles(d).find((f) => {
+      const b = path.basename(f);
+      return b.startsWith(storyId + '-') && /gate/i.test(b);
+    });
     if (hit) return hit;
   }
   return null;

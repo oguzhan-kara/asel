@@ -5,7 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { DEFAULTS } = require('../.claude/hooks/lib/config');
-const { checkStoryEvidence, findGateReport, findPhaseGateReport } = require('../.claude/hooks/lib/evidence');
+const { checkStoryEvidence, findGateReport, findPhaseGateReport, listFiles } = require('../.claude/hooks/lib/evidence');
 
 function project() {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'asel-'));
@@ -48,6 +48,8 @@ test('unknown story is not blocked (no story file)', () => {
 
 test('gate report finders', () => {
   const { d, p1 } = project();
+  w(path.join(p1, 'STORY-30-gate.md'), 'g');
+  assert.strictEqual(findGateReport(d, DEFAULTS.paths, 'STORY-3'), null);
   assert.strictEqual(findGateReport(d, DEFAULTS.paths, 'STORY-003'), null);
   w(path.join(p1, 'STORY-003-gate.md'), 'g');
   assert.ok(findGateReport(d, DEFAULTS.paths, 'STORY-003').endsWith('STORY-003-gate.md'));
@@ -57,4 +59,13 @@ test('gate report finders', () => {
   w(path.join(d, 'docs', 'reports', 'phase-2-gate.md'), 'g');
   assert.ok(findPhaseGateReport(d, DEFAULTS.paths, 2));
   assert.strictEqual(findPhaseGateReport(d, DEFAULTS.paths, 12), null);
+});
+
+test('listFiles returns absolute paths and [] for a missing dir', () => {
+  const { d, p1 } = project();
+  w(path.join(p1, 'a.md'), 'a');
+  const files = listFiles(path.join(d, 'docs'));
+  assert.strictEqual(files.length, 1);
+  assert.ok(path.isAbsolute(files[0]) && files[0].endsWith('a.md'));
+  assert.deepStrictEqual(listFiles(path.join(d, 'nope')), []);
 });
