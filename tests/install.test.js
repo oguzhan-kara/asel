@@ -24,7 +24,7 @@ test('project install renders placeholders, writes config template, is idempoten
   assert.strictEqual(JSON.parse(fs.readFileSync(path.join(target, 'asel.config.json'), 'utf8')).language.conversation, 'en', 'config must not be overwritten');
   const settings2 = JSON.parse(fs.readFileSync(path.join(target, '.claude', 'settings.json'), 'utf8'));
   assert.deepStrictEqual(settings2.hooks, settings.hooks, 'second install must not duplicate hooks');
-  assert.deepStrictEqual(check({ target, mode: 'project', home: tmp() }), { added: [], removed: [], modified: [] });
+  assert.deepStrictEqual(check({ target, mode: 'project', home: tmp(), playwrightPrefix: 'mcp__pw' }), { added: [], removed: [], modified: [] });
   assert.deepStrictEqual(r2.copied.sort(), r1.copied.sort());
 });
 
@@ -49,6 +49,6 @@ test('global install goes under home and skips rules; check reports drift', () =
   assert.ok(fs.existsSync(path.join(home, '.claude', 'hooks', 'asel', 'quality-scan.js')));
   assert.ok(!fs.existsSync(path.join(home, '.claude', 'rules')));
   fs.appendFileSync(path.join(home, '.claude', 'skills', 'asel', 'SKILL.md'), '\nlocal edit\n');
-  const d = check({ mode: 'global', home });
+  const d = check({ mode: 'global', home, playwrightPrefix: 'mcp__pw' });
   assert.deepStrictEqual(d.modified, ['skills/asel/SKILL.md']);
 });
