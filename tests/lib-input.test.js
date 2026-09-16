@@ -23,3 +23,14 @@ test('parseInput tolerates filePath camelCase, skill name and garbage', () => {
   assert.strictEqual(parseInput('not json').command, '');
   assert.strictEqual(parseInput('').cwd, process.cwd());
 });
+
+test('CLAUDE_PROJECT_DIR outranks the payload cwd', () => {
+  const prev = process.env.CLAUDE_PROJECT_DIR;
+  process.env.CLAUDE_PROJECT_DIR = '/from-env';
+  try {
+    assert.strictEqual(parseInput(JSON.stringify({ cwd: '/from-payload' })).cwd, '/from-env');
+    assert.strictEqual(parseInput('').cwd, '/from-env');
+  } finally {
+    if (prev === undefined) delete process.env.CLAUDE_PROJECT_DIR; else process.env.CLAUDE_PROJECT_DIR = prev;
+  }
+});

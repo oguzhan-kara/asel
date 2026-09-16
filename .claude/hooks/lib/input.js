@@ -9,7 +9,7 @@ function parseInput(raw) {
   return {
     event: json.hook_event_name || '',
     tool: json.tool_name || '',
-    cwd: json.cwd || process.cwd(),
+    cwd: process.env.CLAUDE_PROJECT_DIR || json.cwd || process.cwd(),
     command: typeof ti.command === 'string' ? ti.command : '',
     filePath: ti.file_path || ti.filePath || '',
     oldString: ti.old_string || '',

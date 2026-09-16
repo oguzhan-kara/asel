@@ -11,10 +11,19 @@ test('renders agent, rules, paths and root placeholders', () => {
   assert.strictEqual(renderPlaceholders('paths: {{rules.infra}}', ctx), 'paths: ' + JSON.stringify(DEFAULTS.rules.infra));
   const both = JSON.parse(renderPlaceholders('{{rules.frontend,backend}}', ctx));
   assert.deepStrictEqual(both, [...DEFAULTS.rules.frontend, ...DEFAULTS.rules.backend]);
-  assert.strictEqual(renderPlaceholders('{{paths.routemap}}', ctx), '["docs/ROUTEMAP.md"]');
+  assert.strictEqual(renderPlaceholders('{{paths.routemap}}', ctx), 'docs/ROUTEMAP.md');
+  assert.strictEqual(renderPlaceholders('{{pathsList.routemap}}', ctx), '["docs/ROUTEMAP.md"]');
   assert.strictEqual(renderPlaceholders('node "{{hookRoot}}/x.js" {{aselRoot}} {{playwrightPrefix}}__browser_click', ctx), 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/x.js" .claude/skills/asel mcp__plugin_playwright_playwright__browser_click');
+});
+
+test('renders workflow placeholders that prose needs', () => {
+  assert.strictEqual(renderPlaceholders('{{workflow.coAuthor}}', ctx), DEFAULTS.workflow.coAuthor);
+  assert.strictEqual(renderPlaceholders('{{workflow.maxRedispatch}}', ctx), String(DEFAULTS.workflow.maxRedispatch));
+  assert.strictEqual(renderPlaceholders('{{workflow.autopilot}}', ctx), 'false');
 });
 
 test('unknown placeholder throws', () => {
   assert.throws(() => renderPlaceholders('{{nope.x}}', ctx), /unknown placeholder/);
+  assert.throws(() => renderPlaceholders('{{workflow.nope}}', ctx), /unknown placeholder/);
+  assert.throws(() => renderPlaceholders('{{pathsList.nope}}', ctx), /unknown placeholder/);
 });

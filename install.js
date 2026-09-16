@@ -17,7 +17,8 @@ function walk(dir, out = []) {
   }
   return out;
 }
-const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return {}; } };
+// null means "the file exists but is not valid JSON" — callers must not overwrite it blindly.
+const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } };
 const rel = (base, f) => path.relative(base, f).replace(/\\/g, '/');
 
 function layout(opts) {
@@ -25,7 +26,7 @@ function layout(opts) {
   if (opts.mode === 'global') {
     const root = path.join(home, '.claude');
     return {
-      home, root, configFile: path.join(root, 'asel.config.json'), envExample: null, settingsFile: path.join(root, 'settings.json'),
+      home, root, configFile: path.join(root, 'asel.config.json'), envExample: null, gitignore: null, settingsFile: path.join(root, 'settings.json'),
       hookRoot: '$HOME/.claude/hooks/asel', aselRoot: '$HOME/.claude/skills/asel',
       map: { skills: 'skills', agents: 'agents', hooks: 'hooks/asel' },
     };
@@ -33,14 +34,14 @@ function layout(opts) {
   const target = path.resolve(opts.target);
   const root = path.join(target, '.claude');
   return {
-    home, root, configFile: path.join(target, 'asel.config.json'), envExample: path.join(target, '.env.example'), settingsFile: path.join(root, 'settings.json'),
+    home, root, configFile: path.join(target, 'asel.config.json'), envExample: path.join(target, '.env.example'), gitignore: path.join(target, '.gitignore'), settingsFile: path.join(root, 'settings.json'),
     hookRoot: '$CLAUDE_PROJECT_DIR/.claude/hooks', aselRoot: '.claude/skills/asel',
     map: { skills: 'skills', agents: 'agents', rules: 'rules', hooks: 'hooks' },
   };
 }
 
 function resolveConfig(L) {
-  if (fs.existsSync(L.configFile)) return { config: deepMerge(DEFAULTS, readJson(L.configFile)), source: L.configFile };
+  if (fs.existsSync(L.configFile)) return { config: deepMerge(DEFAULTS, readJson(L.configFile) || {}), source: L.configFile };
   return { config: deepMerge(DEFAULTS, {}), source: 'defaults' };
 }
 
@@ -78,6 +79,7 @@ function hookEntries(hookRoot) {
 
 function mergeSettings(file, hookRoot) {
   const s = fs.existsSync(file) ? readJson(file) : {};
+  if (s === null) throw new Error(`${file} is not valid JSON; nothing was changed`);
   s.hooks = s.hooks || {};
   for (const [event, groups] of Object.entries(hookEntries(hookRoot))) {
     const existing = s.hooks[event] || [];
@@ -90,6 +92,16 @@ function mergeSettings(file, hookRoot) {
   }
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, JSON.stringify(s, null, 2) + '\n');
+}
+
+// The notify hook's state file is local bookkeeping. Never create .gitignore — only extend one.
+const NOTIFY_STATE = '.asel-notify-state';
+function ignoreNotifyState(file) {
+  if (!fs.existsSync(file)) return false;
+  const body = fs.readFileSync(file, 'utf8');
+  if (body.split(/\r?\n/).some((l) => l.trim() === NOTIFY_STATE)) return false;
+  fs.writeFileSync(file, `${body.endsWith('\n') || body === '' ? body : body + '\n'}${NOTIFY_STATE}\n`);
+  return true;
 }
 
 function install(opts) {
@@ -107,6 +119,7 @@ function install(opts) {
   if (L.envExample) {
     if (!fs.existsSync(L.envExample)) fs.copyFileSync(path.join(__dirname, '.env.example'), L.envExample); else skipped.push(L.envExample);
   }
+  if (L.gitignore) ignoreNotifyState(L.gitignore);
   const hooksMode = opts.hooksMode === 'always' ? 'always' : 'skill';
   if (hooksMode === 'always') mergeSettings(L.settingsFile, L.hookRoot);
   return { copied, skipped, configSource: source, hooksMode, playwrightPrefix: ctx.playwrightPrefix };
@@ -138,8 +151,11 @@ function parseArgs(argv) {
     if (a === '--project') { o.mode = 'project'; o.target = argv[++i]; }
     else if (a === '--global') o.mode = 'global';
     else if (a === '--check') o.check = true;
-    else if (a.startsWith('--hooks=')) o.hooksMode = a.slice(8);
-    else if (a === '--playwright-prefix') o.playwrightPrefix = argv[++i];
+    else if (a.startsWith('--hooks=')) {
+      o.hooksMode = a.slice(8);
+      if (o.hooksMode !== 'skill' && o.hooksMode !== 'always') throw new Error(`unknown --hooks value: ${o.hooksMode} (expected skill or always)`);
+    } else if (a === '--playwright-prefix') o.playwrightPrefix = argv[++i];
+    else if (a.startsWith('--')) throw new Error(`unknown option: ${a}`);
   }
   if (o.mode === 'project' && !o.target) throw new Error('usage: node install.js --project <dir> | --global [--check] [--hooks=skill|always] [--playwright-prefix <name>]');
   return o;
@@ -156,5 +172,7 @@ function main() {
   console.log(`Asel installed (${o.mode}).\n  files: ${r.copied.length}\n  config: ${r.configSource}\n  hooks: ${r.hooksMode}\n  playwright prefix: ${r.playwrightPrefix}\n  kept: ${r.skipped.join(', ') || '-'}`);
 }
 
-if (require.main === module) main();
-module.exports = { install, check, mergeSettings, hookEntries, parseArgs };
+if (require.main === module) {
+  try { main(); } catch (e) { console.error(e.message); process.exit(1); }
+}
+module.exports = { install, check, mergeSettings, hookEntries, parseArgs, ignoreNotifyState };

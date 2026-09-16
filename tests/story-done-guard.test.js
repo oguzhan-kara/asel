@@ -54,3 +54,20 @@ test('an edit whose old_string is not in the file passes (Edit itself will fail)
   const { d } = proj();
   assert.strictEqual(runHook('story-done-guard', edit(d, 'NOT IN FILE', '| STORY-002 | B | S | [x] DONE | — |')).code, 0);
 });
+
+test('a transitioning story with no story file passes but warns on stderr', () => {
+  const { d } = proj();
+  const edited = edit(d, '| STORY-002 | B | S | [~] IN PROGRESS | Commit |',
+    '| STORY-002 | B | S | [~] IN PROGRESS | Commit |\n| STORY-099 | Onboarded | S | [x] DONE | — |');
+  const r = runHook('story-done-guard', edited);
+  assert.strictEqual(r.code, 0);
+  assert.match(r.stderr, /story-done-guard: no story file found for STORY-099 under docs\/stories; evidence not checked/);
+});
+
+test('config warnings reach stderr without changing the exit code', () => {
+  const { d } = proj();
+  fs.writeFileSync(path.join(d, 'asel.config.json'), '{ not json');
+  const r = runHook('story-done-guard', edit(d, 'NOT IN FILE', 'x'), { home: d });
+  assert.strictEqual(r.code, 0);
+  assert.match(r.stderr, /^asel: .*invalid JSON/m);
+});

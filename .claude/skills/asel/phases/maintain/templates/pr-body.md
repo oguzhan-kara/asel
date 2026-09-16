@@ -60,4 +60,4 @@ Full gate report: `docs/maintenance/<ID>-gate-report.md`
 
 ---
 
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Co-Authored-By: {{workflow.coAuthor}}

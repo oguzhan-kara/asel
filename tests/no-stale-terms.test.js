@@ -8,6 +8,10 @@ const { walk, ROOT } = require('./helpers/walk');
 const FORBIDDEN = [
   'Amil', 'amil-', '/amil', 'dev-browser', 'MultiEdit', 'Task tool', 'jq -r',
   'model: "opus"', 'model: "sonnet"', 'Task dispatch', 'Task call', 'Task prompt', 'Task-based', '(Task,',
+  // Agents are dispatched by subagent_type; prose must not tell the orchestrator to read a
+  // prompt file, point at an install path, or restate a model the agent definition already pins.
+  'Read `asel-', '{{aselRoot}}/asel-', '{{aselRoot}}/agents/',
+  '(Agent tool, opus', '(Agent tool, sonnet', '(model: opus', '(model: sonnet', '~/{{aselRoot}}',
 ];
 
 test('no stale Amil-era terms under .claude/', () => {

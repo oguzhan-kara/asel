@@ -51,9 +51,7 @@ If any blocker → report to user and stop.
 
 ## Step 3 — Dispatch E2E Tester
 
-Read `asel-e2e-tester`.
-
-Dispatch via Agent tool with this context bundle:
+Dispatch `Agent(subagent_type: "asel-e2e-tester", prompt: …)`; model and effort come from the agent definition. Context bundle:
 
 ```
 mode: e2e-check

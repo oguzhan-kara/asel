@@ -63,8 +63,7 @@ When all stories in current phase are DONE:
 
 1. Display phase complete banner
 2. Dispatch Phase Gate Agent:
-   - Read `asel-phase-gate`
-   - Dispatch via Agent tool
+   - dispatch `Agent(subagent_type: "asel-phase-gate", prompt: …)`; model and effort come from the agent definition
    - Pass: phase number, project root, CLAUDE.md path
 
 3. **Evidence verification (MANDATORY — Bash tool, NOT LLM judgment):**

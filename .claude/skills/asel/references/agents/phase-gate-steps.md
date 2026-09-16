@@ -300,8 +300,7 @@ For each polished screen, save:
 
 After visual polish, verify that this phase's DONE stories are fully implemented as documented.
 
-1. Read `asel-compliance-auditor`
-2. Dispatch Compliance Auditor via Agent tool
+1. dispatch `Agent(subagent_type: "asel-compliance-auditor", prompt: …)`; model and effort come from the agent definition
    - Pass: project root, CLAUDE.md path, trigger mode = `PHASE_GATE`, phase number
 3. Auditor builds 5 inventories (endpoints, schema, screens, components, business rules) from docs
 4. Compares against actual codebase (static + runtime since app is already deployed)

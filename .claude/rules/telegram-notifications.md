@@ -1,5 +1,5 @@
 ---
-paths: {{paths.routemap}}
+paths: {{pathsList.routemap}}
 ---
 
 # Telegram Notification Rule

@@ -10,7 +10,7 @@ const EXPECT = {
   'routemap-discipline.md': null, 'strict-protocol.md': null,
   'clean-code.md': '{{rules.backend,frontend}}', 'i18n-standards.md': '{{rules.frontend,backend}}',
   'naming-conventions.md': '{{rules.frontend,backend}}', 'env-configuration.md': '{{rules.infra}}',
-  'makefile-standards.md': '{{rules.infra}}', 'telegram-notifications.md': '{{paths.routemap}}',
+  'makefile-standards.md': '{{rules.infra}}', 'telegram-notifications.md': '{{pathsList.routemap}}',
 };
 
 test('rules carry the expected paths: scoping', () => {

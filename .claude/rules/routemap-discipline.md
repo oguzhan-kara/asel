@@ -83,7 +83,7 @@ Before dispatching, read the count:
 wc -l < docs/stories/phase-N/STORY-NNN-attempts.log 2>/dev/null || echo 0
 ```
 
-**Hard limit: 3 total re-dispatches per story.** Exceeding this count → STOP the escalation ladder, set ROUTEMAP Step = `Escalated`, present the issue to the user. This bound is mathematical — the LLM cannot talk itself into a 4th attempt because the counter is persisted to disk.
+**Hard limit: {{workflow.maxRedispatch}} total re-dispatches per story.** Exceeding this count → STOP the escalation ladder, set ROUTEMAP Step = `Escalated`, present the issue to the user. This bound is mathematical — the LLM cannot talk itself into a 4th attempt because the counter is persisted to disk.
 
 Both files are per-story (filename includes story ID) — they are fresh for each new story, no reset needed.
 

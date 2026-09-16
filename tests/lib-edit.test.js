@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { resolveTarget, readCurrent, proposeDocument } = require('../.claude/hooks/lib/edit');
+const { resolveTarget, readCurrent, proposeDocument, isRoutemapEdit } = require('../.claude/hooks/lib/edit');
 
 test('resolveTarget: absolute filePath returned unchanged', () => {
   const abs = path.resolve(os.tmpdir(), 'file.md');
@@ -64,4 +64,20 @@ test('proposeDocument: Edit with no oldString but with content is treated as Wri
 test('proposeDocument: Write with no oldString returns content', () => {
   const input = { tool: 'Write', content: 'new', raw: {} };
   assert.strictEqual(proposeDocument(input, 'old'), 'new');
+});
+
+test('isRoutemapEdit: honours a renamed paths.routemap', () => {
+  const config = { paths: { routemap: 'docs/PLAN.md' } };
+  const cwd = path.resolve(os.tmpdir(), 'proj');
+  assert.strictEqual(isRoutemapEdit({ cwd, filePath: 'docs/PLAN.md' }, config), true);
+  assert.strictEqual(isRoutemapEdit({ cwd, filePath: path.join(cwd, 'docs', 'PLAN.md') }, config), true);
+  assert.strictEqual(isRoutemapEdit({ cwd, filePath: 'docs/OTHER.md' }, config), false);
+  assert.strictEqual(isRoutemapEdit({ cwd, filePath: '' }, config), false);
+});
+
+test('isRoutemapEdit: falls back to the ROUTEMAP basename convention', () => {
+  const config = { paths: { routemap: 'docs/PLAN.md' } };
+  const cwd = path.resolve(os.tmpdir(), 'proj');
+  assert.strictEqual(isRoutemapEdit({ cwd, filePath: 'docs/ROUTEMAP.md' }, config), true);
+  assert.strictEqual(isRoutemapEdit({ cwd, filePath: 'routemap-notes/summary.md' }, config), false);
 });

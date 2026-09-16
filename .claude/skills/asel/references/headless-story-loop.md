@@ -87,7 +87,7 @@ fi
 dispatch_cmd="
   set -o pipefail
   claude -p \"\$(cat <<'PROMPT'
-You are invoked as a HEADLESS sub-Claude under asel orchestration. Read the 'Sub-Claude Per-Story Protocol' section of {{aselRoot}}/phases/development/headless-autopilot.md (global fallback: ~/{{aselRoot}}/phases/development/headless-autopilot.md) and follow it exactly.
+You are invoked as a HEADLESS sub-Claude under asel orchestration. Read the 'Sub-Claude Per-Story Protocol' section of {{aselRoot}}/phases/development/headless-autopilot.md and follow it exactly.
 
 Your job: complete EXACTLY ONE story, then exit. Do NOT chain into a second story.
 
@@ -291,7 +291,7 @@ You are invoked in HEADLESS mode under asel orchestration. Your job: run Phase G
 Protocol:
 1. Read docs/ROUTEMAP.md → identify the current dev phase (all stories marked [x] DONE).
 2. Load asel skill and follow phases/development/autopilot.md 'Phase Boundary — Phase Gate Testing' section.
-3. Read {{aselRoot}}/asel-phase-gate and dispatch via Agent tool (model: opus). Pass phase number, project root, CLAUDE.md path.
+3. Dispatch `Agent(subagent_type: "asel-phase-gate", prompt: …)`; model and effort come from the agent definition. Pass phase number, project root, CLAUDE.md path.
 4. Verify evidence via Bash (step-log.txt, evidence files) before trusting Phase Gate's return status.
 5. Update ROUTEMAP with phase result (mark phase [DONE] on PASS).
 6. Exit after gate report is written to docs/e2e-evidence/phase-N/.

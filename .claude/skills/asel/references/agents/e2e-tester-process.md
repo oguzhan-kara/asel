@@ -302,8 +302,7 @@ After all testing passes, perform a comprehensive gap analysis between project d
 
 **Only runs in `polish-full` mode. Skip entirely in `e2e-check` mode — Pass P replaces this.**
 
-1. Read `asel-compliance-auditor`
-2. Dispatch Compliance Auditor via Agent tool
+1. dispatch `Agent(subagent_type: "asel-compliance-auditor", prompt: …)`; model and effort come from the agent definition
    - Pass: project root, CLAUDE.md path, trigger mode = `E2E`
 3. Auditor scans ALL docs → builds 5 inventories (endpoints, schema, screens, components, business rules)
 4. Compares against codebase (static + runtime since app is deployed)

@@ -1,7 +1,6 @@
 ---
 name: asel-seed-generator
 description: Generates realistic seed data scripts.
-tools: *
 model: {{agents.seed-generator.model}}
 effort: {{agents.seed-generator.effort}}
 ---

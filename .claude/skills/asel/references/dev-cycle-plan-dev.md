@@ -3,7 +3,7 @@
 ## Step 1 — PLAN: Planner Dispatch
 
 **Planner Agent** — dispatched via Agent tool:
-1. Read `asel-planner` → pass as prompt to Agent tool
+1. dispatch `Agent(subagent_type: "asel-planner", prompt: …)`; model and effort come from the agent definition
 2. Include in prompt: story file path, project root path, any user feedback (if re-dispatch)
 3. Agent runs in isolated context → reads all docs → writes plan to `docs/stories/phase-N/STORY-NNN-plan.md`
 4. Agent returns summary to Asel
@@ -37,7 +37,7 @@
    ```
 4. Read the plan file: `docs/stories/phase-N/STORY-NNN-plan.md`
 5. Parse the `## Tasks` section → extract all Task blocks with `Context refs`, `Depends on`, `Complexity`, and `Pattern ref` fields
-6. Read `asel-developer` (for system instructions)
+6. Dev tasks go to `Agent(subagent_type: "asel-developer", prompt: …)`; model and effort come from the agent definition
 7. Read project `CLAUDE.md` (for conventions)
 8. If any task has UI → read `docs/FRONTEND.md` (for design tokens)
 9. **Build dependency graph** from `Depends on` fields → group tasks into execution waves:

@@ -7,7 +7,7 @@
 ## Process
 
 1. **Update ROUTEMAP**: Mark Step 8 as `[~] IN PROGRESS`
-2. Read `asel-reviewer` → dispatch via Agent tool with context "planning-review"
+2. dispatch `Agent(subagent_type: "asel-reviewer", prompt: …)` with context "planning-review"; model and effort come from the agent definition
 3. Agent writes report → `docs/reports/planning-review.md`
 4. Agent returns summary → Asel reads summary
 5. Agent checks:

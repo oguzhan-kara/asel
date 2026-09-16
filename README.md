@@ -51,8 +51,10 @@ defaults):
   language the orchestrator talks to the user in versus which language it writes files in.
 - `paths` — where project documents live: `docs`, `routemap`, `stories`, `reports`,
   `usertest`, `claudeMd`. Hooks and agents read these instead of hardcoding paths.
-- `workflow` — process switches: `autopilot`, `reviewBeforeCommit`, `phaseGateRequired`,
-  `maxRedispatch` (escalation cap), `coAuthor` (git trailer).
+- `workflow` — process switches: `autopilot`, `maxRedispatch` (escalation cap, rendered into
+  the escalation-ladder prose via `{{workflow.maxRedispatch}}`) and `coAuthor` (git trailer,
+  rendered into commit templates via `{{workflow.coAuthor}}`). `reviewBeforeCommit` and
+  `phaseGateRequired` are **reserved — documented intent, not yet enforced by a hook**.
 - `agents` — per-agent `{ model, effort }` (some also add `escalationModel`) for all 19
   subagents; rendered verbatim into each agent's frontmatter at install time.
 - `guards` — per-guard `{ enabled, level }` (plus guard-specific extras such as
@@ -83,22 +85,28 @@ control flow. Hook-driven events (ROUTEMAP state changes) go through
 `.claude/hooks/notify-hook.js` automatically; events the LLM must send itself go through
 `node "$CLAUDE_PROJECT_DIR/.claude/hooks/notify-cli.js" "<message>"`.
 
+While `notifications.telegram.enabled` is `false` the hook is a complete no-op. Once enabled,
+its first run seeds `.asel-notify-state` in the project root — a plain list of already-announced
+ROUTEMAP events, so enabling notifications on a project with history does not flood the chat.
+The file is local bookkeeping and should not be committed: a project install appends
+`.asel-notify-state` to an existing `.gitignore` (it never creates one).
+
 ## Guards
 
 | Guard | Event | Default level | Checks |
 |---|---|---|---|
-| `qualityScan` | PreToolUse (`Bash`, `git commit`) | `block` | Staged files for stale debug prints, SQL injection patterns, hardcoded secrets, XSS sinks, non-shadcn UI imports, raw HTML/native dialogs — per `guards.qualityScan.skipPaths`. |
+| `qualityScan` | PreToolUse (`Bash`, `git commit`) | `block` | Staged files for stale debug prints, SQL injection patterns, hardcoded secrets, XSS sinks, non-shadcn UI imports, raw HTML/native dialogs. `guards.qualityScan.skipPaths` exempts a file from the **secret rule only** — SQL injection, XSS and UI rules always apply. |
 | `gateGuard` | PreToolUse (`Bash`, `git commit`) | `block` | A gate report exists for the in-progress story before allowing the commit. |
-| `storyDoneGuard` | PreToolUse (`Edit`/`Write` to ROUTEMAP) | `block` | Any story being newly marked `[x] DONE` has full evidence (plan, gate, deliverable, review, step-log). |
+| `storyDoneGuard` | PreToolUse (`Edit`/`Write` to ROUTEMAP) | `block` | Any story being newly marked `[x] DONE` has full evidence (plan, gate, review, step-log). A story with no story file under `paths.stories` passes with a warning on stderr. |
 | `setupGuard` | PreToolUse (`Edit`/`Write` to ROUTEMAP) | `block` | Before starting the 2nd+ story of Phase 1, infra-tuning and setup-verification reports exist. |
 | `phaseGateGuard` | PostToolUse (`Edit`/`Write` to ROUTEMAP) | `warn` | After a ROUTEMAP edit, if every story in the in-progress phase is DONE but no phase-gate report exists yet. |
 | `skillGuard` | PreToolUse (`Skill`) | `block` | The orchestrator itself never invokes a skill listed in `guards.skillGuard.userOnlySkills`. |
-| `stopCheck` | `Stop` | `warn` | Warns the user when the session ends mid-story so they know to resume with `/asel`. |
+| `stopCheck` | `Stop` | `warn` (fixed) | Warns the user when the session ends mid-story so they know to resume with `/asel`. `level` is not configurable for this guard — it always warns. |
 
 A guard's `level: "block"` only takes effect on `PreToolUse` and `Stop` — those are the only
 events where blocking (exit code 2) is meaningful. If a guard configured as `block` is
-attached to a `PostToolUse` event (the tool already ran), it is silently downgraded to
-`warn` and a note is included in the hook's output; `phaseGateGuard` is `warn` by default
+attached to a `PostToolUse` event (the tool already ran), it is downgraded to `warn` and the
+note is printed by the guard that warns (it appears in that hook's stderr, not anywhere else); `phaseGateGuard` is `warn` by default
 for exactly this reason.
 
 ## Adding a project-specific rule

@@ -1,7 +1,6 @@
 ---
 name: asel-test-hardener
 description: Raises test coverage and robustness after E2E.
-tools: *
 model: {{agents.test-hardener.model}}
 effort: {{agents.test-hardener.effort}}
 ---

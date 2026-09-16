@@ -16,7 +16,9 @@ test('19 agent files exist with valid frontmatter and placeholders', () => {
     assert.ok(fm, `${a.role}: frontmatter`);
     assert.match(fm[1], new RegExp(`^name: asel-${a.role}$`, 'm'));
     assert.match(fm[1], /^description: .+/m);
-    assert.match(fm[1], /^tools: .+/m);
+    // `tools: *` is not a documented value: those agents omit the key and inherit every tool.
+    if (a.tools === '*') assert.doesNotMatch(fm[1], /^tools:/m, `${a.role}: tools: * must not be written out`);
+    else assert.match(fm[1], /^tools: .+/m);
     assert.match(fm[1], new RegExp(`^model: \\{\\{agents\\.${a.role}\\.model\\}\\}$`, 'm'));
     assert.match(fm[1], new RegExp(`^effort: \\{\\{agents\\.${a.role}\\.effort\\}\\}$`, 'm'));
     assert.ok(!/^---\n[\s\S]*^---\n[\s\S]*^---/m.test(text.slice(fm[0].length)), `${a.role}: nested frontmatter left in body`);

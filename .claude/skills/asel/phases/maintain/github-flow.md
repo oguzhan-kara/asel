@@ -78,7 +78,7 @@ chore(asel): ignore asel worktrees
 Adds .claude/worktrees/ to .gitignore so MAINTAIN-mode worktrees
 created by Asel don't pollute the working tree.
 
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Co-Authored-By: {{workflow.coAuthor}}
 EOF
 )"
 git push -u origin chore/asel-worktree-ignore
@@ -195,7 +195,7 @@ git commit -m "$(cat <<'EOF'
 
 Closes #<ISSUE_NUM>
 
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Co-Authored-By: {{workflow.coAuthor}}
 EOF
 )"
 ```

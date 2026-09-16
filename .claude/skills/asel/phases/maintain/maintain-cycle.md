@@ -69,7 +69,7 @@ All three pipelines share the GitHub flow defined in `phases/maintain/github-flo
 
 Lightest process — no plan file, no investigation. Still goes through full GitHub flow.
 
-1. **GH-1** — `gh issue create --label hotfix --title "HOTFIX-NNN: <title>" --body-file …` (template: `templates/issue-hotfix.md`)
+1. **GH-1** — `gh issue create --label hotfix --title "HOTFIX-NNN: <title>" --body-file …` (template: `{{aselRoot}}/phases/maintain/templates/issue-hotfix.md`)
 2. **GH-2** — `git worktree add .claude/worktrees/HOTFIX-NNN -b hotfix/hotfix-nnn-<slug> origin/main`
 3. **GH-3** — Pipeline body inside worktree:
    - Dispatch Developer agent (Agent):
@@ -79,7 +79,7 @@ Lightest process — no plan file, no investigation. Still goes through full Git
      - Verify: build passes, ALL existing tests pass (regression-clean), no pattern violations
      - Gate runs inside worktree (cwd via pre-dispatch `cd`, plus WORKTREE context block)
 4. **GH-4** — Commit `fix(HOTFIX-NNN): <title>` inside worktree (heredoc with Closes # + Co-Authored-By)
-5. **GH-5** — Push + PR (template: `templates/pr-body.md`, label: `hotfix`)
+5. **GH-5** — Push + PR (template: `{{aselRoot}}/phases/maintain/templates/pr-body.md`, label: `hotfix`)
 6. **GH-6** — User approval → "evet" / "hayır" / "detay"
 7. **GH-7** — `gh pr merge <PR> --squash --delete-branch` + worktree cleanup
 8. **GH-8** — Sync local main, Telegram: `"[Project] HOTFIX-NNN: <title> done (X/Y — Z%) — PR #<N> merged"`
@@ -88,7 +88,7 @@ Lightest process — no plan file, no investigation. Still goes through full Git
 
 Medium process — investigation + lightweight plan + Bug Fix TDD.
 
-1. **GH-1** — `gh issue create --label bug --title "BUG-NNN: <title>" --body-file …` (template: `templates/issue-bug.md`)
+1. **GH-1** — `gh issue create --label bug --title "BUG-NNN: <title>" --body-file …` (template: `{{aselRoot}}/phases/maintain/templates/issue-bug.md`)
 2. **GH-2** — `git worktree add .claude/worktrees/BUG-NNN -b fix/bug-nnn-<slug> origin/main`
 3. **GH-3** — Pipeline body inside worktree:
    - Dispatch Planner agent in **FIX mode** (Agent):
@@ -110,7 +110,7 @@ Medium process — investigation + lightweight plan + Bug Fix TDD.
      - Gate verifies: reproduction test exists AND passes
    - E2E regression test (deploy + smoke + affected flows) inside worktree context
 4. **GH-4** — Commit `fix(BUG-NNN): <title>` inside worktree (heredoc with Closes # + Co-Authored-By)
-5. **GH-5** — Push + PR (template: `templates/pr-body.md`, label: `bug`)
+5. **GH-5** — Push + PR (template: `{{aselRoot}}/phases/maintain/templates/pr-body.md`, label: `bug`)
 6. **GH-6** — User approval → "evet" / "hayır" / "detay"
 7. **GH-7** — `gh pr merge <PR> --squash --delete-branch` + worktree cleanup
 8. **GH-8** — Sync local main, Telegram: `"[Project] BUG-NNN: <title> done (X/Y — Z%) — PR #<N> merged"`
@@ -119,7 +119,7 @@ Medium process — investigation + lightweight plan + Bug Fix TDD.
 
 Full process — impact analysis + full plan.
 
-1. **GH-1** — `gh issue create --label enhance --title "ENH-NNN: <title>" --body-file …` (template: `templates/issue-enhance.md`)
+1. **GH-1** — `gh issue create --label enhance --title "ENH-NNN: <title>" --body-file …` (template: `{{aselRoot}}/phases/maintain/templates/issue-enhance.md`)
 2. **GH-2** — `git worktree add .claude/worktrees/ENH-NNN -b feat/enh-nnn-<slug> origin/main`
 3. **GH-3** — Pipeline body inside worktree:
    - Invoke `asel-change-analyst` skill (with **WORKTREE block** in context):
@@ -137,7 +137,7 @@ Full process — impact analysis + full plan.
      - Full gate including regression + visual quality, runs inside worktree
    - E2E regression test inside worktree context
 4. **GH-4** — Commit `feat(ENH-NNN): <title>` inside worktree (heredoc with Closes # + Co-Authored-By)
-5. **GH-5** — Push + PR (template: `templates/pr-body.md`, label: `enhance`)
+5. **GH-5** — Push + PR (template: `{{aselRoot}}/phases/maintain/templates/pr-body.md`, label: `enhance`)
 6. **GH-6** — User approval → "evet" / "hayır" / "detay"
 7. **GH-7** — `gh pr merge <PR> --squash --delete-branch` + worktree cleanup
 8. **GH-8** — Sync local main, Telegram: `"[Project] ENH-NNN: <title> done (X/Y — Z%) — PR #<N> merged"`

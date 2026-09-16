@@ -4,9 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const { readInput } = require('./lib/input');
 const { loadConfig } = require('./lib/config');
+const { emitWarnings } = require('./lib/exit');
 const { parseRoutemap, progress } = require('./lib/routemap');
 const { sendTelegram } = require('./lib/notify');
-const { resolveTarget, readCurrent } = require('./lib/edit');
+const { resolveTarget, readCurrent, isRoutemapEdit } = require('./lib/edit');
+const { listFiles } = require('./lib/evidence');
 
 const STATE_FILE = '.asel-notify-state';
 
@@ -26,14 +28,12 @@ function seedState(rm) {
 }
 
 function artifact(cwd, paths, id, suffix) {
-  const root = path.join(cwd, paths.stories);
-  if (!fs.existsSync(root)) return '✗';
-  for (const phaseDir of fs.readdirSync(root)) {
-    const dir = path.join(root, phaseDir);
-    if (!fs.statSync(dir).isDirectory()) continue;
-    if (fs.readdirSync(dir).some((f) => f.startsWith(id) && f.endsWith(`${suffix}.md`))) return '✓';
-  }
-  return '✗';
+  // "<id>-" — without the dash STORY-1 would match STORY-12's artifacts.
+  const hit = listFiles(path.join(cwd, paths.stories)).some((f) => {
+    const b = path.basename(f);
+    return b.startsWith(`${id}-`) && b.endsWith(`${suffix}.md`);
+  });
+  return hit ? '✓' : '✗';
 }
 
 function computeEvents(rm, state, cwd, paths) {
@@ -72,8 +72,11 @@ function computeEvents(rm, state, cwd, paths) {
 
 async function main() {
   const input = readInput();
-  if (!/routemap/i.test(input.filePath)) return;
-  const { config } = loadConfig(input.cwd);
+  const { config, warnings } = loadConfig(input.cwd);
+  emitWarnings(warnings);
+  // Notifications off: do not even seed the state file — the hook is a no-op.
+  if (!config.notifications.telegram.enabled) return;
+  if (!isRoutemapEdit(input, config)) return;
   const target = resolveTarget(input, config.paths.routemap);
   const current = readCurrent(target);
   if (!current) return;

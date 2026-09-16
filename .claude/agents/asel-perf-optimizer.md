@@ -1,7 +1,6 @@
 ---
 name: asel-perf-optimizer
 description: Measures and optimizes performance hotspots.
-tools: *
 model: {{agents.perf-optimizer.model}}
 effort: {{agents.perf-optimizer.effort}}
 ---

@@ -35,24 +35,35 @@ test('computeEvents emits story, escalated/failed, phase and macro events once',
   assert.deepStrictEqual(again.events, []);
 });
 
-test('hook seeds state on first run and exits 0; disabled notifications still maintain state', () => {
+function project(enabled) {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'asel-'));
   fs.mkdirSync(path.join(d, 'docs'), { recursive: true });
   fs.writeFileSync(path.join(d, 'docs', 'ROUTEMAP.md'), basic);
+  if (enabled) fs.writeFileSync(path.join(d, 'asel.config.json'), JSON.stringify({ notifications: { telegram: { enabled: true } } }));
+  return d;
+}
+
+test('hook does nothing — not even seed state — while notifications are disabled', () => {
+  const d = project(false);
   const input = { hook_event_name: 'PostToolUse', tool_name: 'Edit', cwd: d, tool_input: { file_path: 'docs/ROUTEMAP.md' } };
-  assert.strictEqual(runHook('notify-hook', input).code, 0);
+  assert.strictEqual(runHook('notify-hook', input, { home: d }).code, 0);
+  assert.ok(!fs.existsSync(path.join(d, '.asel-notify-state')), 'disabled notifications must not write a state file');
+});
+
+test('hook seeds state on first run and exits 0 once notifications are enabled', () => {
+  const d = project(true);
+  const input = { hook_event_name: 'PostToolUse', tool_name: 'Edit', cwd: d, tool_input: { file_path: 'docs/ROUTEMAP.md' } };
+  assert.strictEqual(runHook('notify-hook', input, { home: d }).code, 0);
   const state = fs.readFileSync(path.join(d, '.asel-notify-state'), 'utf8');
   assert.match(state, /STORY:STORY-001/);
-  assert.strictEqual(runHook('notify-hook', input).code, 0);
+  assert.strictEqual(runHook('notify-hook', input, { home: d }).code, 0);
 });
 
 test('hook resolves absolute file_path and seeds state', () => {
-  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'asel-'));
-  fs.mkdirSync(path.join(d, 'docs'), { recursive: true });
-  fs.writeFileSync(path.join(d, 'docs', 'ROUTEMAP.md'), basic);
+  const d = project(true);
   const absPath = path.join(d, 'docs', 'ROUTEMAP.md');
   const input = { hook_event_name: 'PostToolUse', tool_name: 'Edit', cwd: d, tool_input: { file_path: absPath } };
-  assert.strictEqual(runHook('notify-hook', input).code, 0);
+  assert.strictEqual(runHook('notify-hook', input, { home: d }).code, 0);
   const state = fs.readFileSync(path.join(d, '.asel-notify-state'), 'utf8');
   assert.match(state, /STORY:STORY-001/);
 });

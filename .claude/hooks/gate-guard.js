@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 const { readInput } = require('./lib/input');
-const { finish } = require('./lib/exit');
+const { finish, emitWarnings } = require('./lib/exit');
 const { loadConfig, guard } = require('./lib/config');
 const { readSession } = require('./lib/session');
 const { findGateReport } = require('./lib/evidence');
@@ -9,7 +9,8 @@ const { findGateReport } = require('./lib/evidence');
 const PAST_GATE = new Set(['Commit', 'Close', 'Done', 'Review', 'Handoff']);
 
 const input = readInput();
-const { config } = loadConfig(input.cwd);
+const { config, warnings } = loadConfig(input.cwd);
+emitWarnings(warnings);
 const g = guard(config, 'gateGuard', input.event || 'PreToolUse');
 if (!g.enabled || !/git\s+commit/.test(input.command)) finish('warn', '');
 

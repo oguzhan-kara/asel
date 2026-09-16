@@ -2,7 +2,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { AGENTS } = require('./agent-manifest');
+const { AGENTS, toolsLine } = require('./agent-manifest');
 
 const [amilSrc, amilRules] = process.argv.slice(2);
 if (!amilSrc || !amilRules) { console.error('usage: node scripts/port-from-amil.js <AMIL_SRC> <AMIL_RULES_DIR>'); process.exit(1); }
@@ -46,7 +46,7 @@ copyTree(path.join(amilSrc, 'templates'), path.join(OUT, 'skills', 'asel', 'temp
 // 2) agents with frontmatter
 for (const a of AGENTS) {
   const body = port(fs.readFileSync(path.join(amilSrc, a.source), 'utf8')).replace(/^---[\s\S]*?---\n/, '');
-  const fm = ['---', `name: asel-${a.role}`, `description: ${a.description}`, `tools: ${a.tools}`,
+  const fm = ['---', `name: asel-${a.role}`, `description: ${a.description}`, toolsLine(a),
     `model: {{agents.${a.role}.model}}`, `effort: {{agents.${a.role}.effort}}`, a.skills ? `skills: ${a.skills}` : null, '---', ''].filter((x) => x !== null).join('\n');
   write(path.join(OUT, 'agents', `asel-${a.role}.md`), fm + body);
 }

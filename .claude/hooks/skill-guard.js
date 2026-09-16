@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 'use strict';
 const { readInput } = require('./lib/input');
-const { finish } = require('./lib/exit');
+const { finish, emitWarnings } = require('./lib/exit');
 const { loadConfig, guard } = require('./lib/config');
 
 const input = readInput();
-const { config } = loadConfig(input.cwd);
+const { config, warnings } = loadConfig(input.cwd);
+emitWarnings(warnings);
 const g = guard(config, 'skillGuard', input.event || 'PreToolUse');
 if (!g.enabled || !input.skill) finish('warn', '');
 const userOnly = new Set(g.userOnlySkills || []);

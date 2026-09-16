@@ -4,12 +4,15 @@
 > Ana Asel manages all steps directly (Plan → Dev → Lint → Gate → Review → Commit).
 > Before starting: Read `rules/routemap-discipline.md` for step transition protocol.
 
-## Agent Prompts
-- Planner: `asel-planner` (Agent tool, opus)
-- Developer: `asel-developer` (Agent tool, sonnet — opus on escalation)
-- Gate: `asel-gate-lead` (Agent tool, opus — team architecture: lead + 3 parallel scouts). Legacy monolithic agent at `asel-legacy-gate` retained for fallback.
-- Reviewer: `asel-reviewer` (Agent tool, opus)
-- Setup Verifier: `asel-setup-verifier` (Agent tool, opus — Phase 1 first story only)
+## Agents
+
+Dispatch each by name — `Agent(subagent_type: "asel-<role>", prompt: …)`; model and effort come from the agent definition.
+
+- Planner: `asel-planner`
+- Developer: `asel-developer` (escalation model from `agents.developer.escalationModel`)
+- Gate: `asel-gate-lead` (team architecture: lead + 3 parallel scouts). Legacy monolithic agent at `asel-legacy-gate` retained for fallback.
+- Reviewer: `asel-reviewer`
+- Setup Verifier: `asel-setup-verifier` (Phase 1 first story only)
 
 ---
 
@@ -129,7 +132,7 @@ Before dispatching, read the count:
 wc -l < docs/stories/phase-N/STORY-NNN-attempts.log 2>/dev/null || echo 0
 ```
 
-**Hard limit: 3 total re-dispatches per story.** When count ≥ 3 → STOP the escalation ladder, set ROUTEMAP Step = `Escalated`, present issues to user with the 3 options (düzelt/atla/dur). This bound is mathematical, not LLM judgment — it survives compaction because the file persists.
+**Hard limit: {{workflow.maxRedispatch}} total re-dispatches per story.** When the count reaches that bound → STOP the escalation ladder, set ROUTEMAP Step = `Escalated`, present issues to user with the 3 options (düzelt/atla/dur). This bound is mathematical, not LLM judgment — it survives compaction because the file persists.
 
 The counter is per-story, reset when a new story starts (file is fresh per story because its filename includes the story ID).
 
@@ -216,8 +219,8 @@ If any persistence check fails, DO NOT announce handoff. Fix the issue first.
 
 ### Step A: DevOps Agent (Infrastructure Tuning)
 
-**DevOps Agent** — dispatched by Ana Asel via Agent tool:
-1. Read `asel-devops` → pass as prompt to Agent tool with `mode: "post-setup"`
+**DevOps Agent** — dispatched by Ana Asel:
+1. dispatch `Agent(subagent_type: "asel-devops", prompt: …)` with `mode: "post-setup"` in the prompt; model and effort come from the agent definition
 2. Include in prompt: project root path, CLAUDE.md path
 3. Agent reads ARCHITECTURE.md for deployment model (single node / cluster / hybrid)
 4. Agent tunes all Docker services: database, cache, web server, message broker, etc.
@@ -229,8 +232,8 @@ If any persistence check fails, DO NOT announce handoff. Fix the issue first.
 
 ### Step B: Setup Verifier (Infrastructure Verification)
 
-**Setup Verifier Agent** — dispatched by Ana Asel via Agent tool:
-1. Read `asel-setup-verifier` → pass as prompt to Agent tool
+**Setup Verifier Agent** — dispatched by Ana Asel:
+1. dispatch `Agent(subagent_type: "asel-setup-verifier", prompt: …)`; model and effort come from the agent definition
 2. Include in prompt: project root path, CLAUDE.md path
 3. Agent runs in isolated context → verifies Makefile, Docker, DB, Web access
 4. Agent writes report → `docs/reports/setup-verification.md`

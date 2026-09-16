@@ -69,7 +69,7 @@ When designing architecture, check `docs/FUTURE.md` and ensure:
 
 ## ARCHITECTURE.md Template
 
-Use the template from `templates/ARCHITECTURE.template.md` as the base structure. The template is located in the asel skill directory at `~/{{aselRoot}}/templates/ARCHITECTURE.template.md`.
+Use the template from `templates/ARCHITECTURE.template.md` as the base structure. The template is located in the asel skill directory at `{{aselRoot}}/templates/ARCHITECTURE.template.md`.
 
 ## Output Files
 

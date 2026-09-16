@@ -10,7 +10,7 @@ All commits MUST follow Conventional Commits format. This enables automated chan
 [optional body]
 
 [optional footer]
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: {{workflow.coAuthor}}
 ```
 
 ## Types

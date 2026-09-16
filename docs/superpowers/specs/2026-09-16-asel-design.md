@@ -240,7 +240,7 @@ uses `child_process.spawn` with `detached:true` via a small `hooks/lib/spawn.js`
 
 ### 6.3 Utility skills
 
-All seven carry `user-invocable: true` and `disable-model-invocation: true`.
+The six skills in `guards.skillGuard.userOnlySkills` carry user-invocable + disable-model-invocation; `asel-deploy` stays model-invocable.
 
 - `asel-setup`: writes statusline only if none is configured (otherwise prints how to
   switch); adds permissions with valid syntax (`Bash(git:*)`, `Bash(npm:*)`, MCP names

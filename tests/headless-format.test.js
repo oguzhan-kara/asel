@@ -89,3 +89,9 @@ test('malformed JSON lines are skipped without crashing the CLI', () => {
   const out = runFormatter(input);
   assert.strictEqual(out, '\n═══ RESULT success ═══\n');
 });
+
+test('the module can be required without starting the stdin loop', () => {
+  const { formatEvent } = require(SCRIPT);
+  assert.strictEqual(typeof formatEvent, 'function');
+  assert.deepStrictEqual(formatEvent({ type: 'system', subtype: 'init' }), ['═══ HEADLESS session started ═══']);
+});

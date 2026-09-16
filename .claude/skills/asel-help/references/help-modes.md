@@ -162,15 +162,16 @@
   SON DEGISIKLIKLER (CHANGELOG)
 ═══════════════════════════════════════════════════════════════════════════
 
-  Tam changelog: {{aselRoot}}/CHANGELOG.md
+  Tam changelog: the Asel source repo's CHANGELOG.md
 
   2026-04-12:
   ├── HEADLESS Autopilot Mode eklendi (YENi)
   │   ├── /asel headless — phase-scoped autopilot alternatifi
   │   ├── Her story ayri claude -p sub-session'da (fresh context)
   │   ├── Ana Asel bash loop driver (Bash tool ile)
-  │   ├── claude -p detached (nohup & disown, foreground Bash
-  │   │   call — NOT run_in_background), 10dk cap'e takilmaz
+  │   ├── claude -p detached (spawn-detached.js helper,
+  │   │   foreground Bash call — NOT run_in_background),
+  │   │   10dk cap'e takilmaz
   │   ├── Idempotency guard: PID file + pgrep check, cifte
   │   │   dispatch yasak (eski "prev.log" sorunu cozuldu)
   │   ├── Adaptive backoff polling: 5 → 10 → 20 → 30 dk

@@ -6,7 +6,7 @@ const { matchesAny } = require('./glob');
 // .claude/hooks/lib is included because the scanner's own regex pattern definitions
 // (e.g., const XSS = /...innerHTML.../) would trigger false positives.
 const PRIMITIVE_DIR = /\/(ui|atoms|primitives)\/|ui-kit\/|^docs\/|\/__tests__\/|\.claude\/hooks\/lib\//;
-const SECRET_SKIP = /test|mock|example|fixture|seed|\.env|\.superpowers/i;
+const SECRET_SKIP = /(^|[\/._-])(tests?|spec|__tests__|mocks?|examples?|fixtures?|seeds?|\.superpowers)([\/._-]|$)|(^|\/)\.env/i;
 const DEBUG = {
   ts: /^\s*console\.(log|debug|info)\(/, tsx: /^\s*console\.(log|debug|info)\(/, js: /^\s*console\.(log|debug|info)\(/, jsx: /^\s*console\.(log|debug|info)\(/,
   go: /^\s*fmt\.Print(ln|f)?\(/, py: /^\s*print\(|^\s*breakpoint\(\)|^\s*import\s+pdb/,

@@ -24,4 +24,8 @@ const AGENTS = [
   { role: 'legacy-gate', source: 'agents/gate-prompt.md', description: 'Single-agent quality gate fallback when the gate team cannot be used.', tools: `${RO}, Bash, Write` },
 ];
 
-module.exports = { AGENTS };
+// `tools: *` is not a documented frontmatter value — omitting the key is how an
+// agent inherits every tool, so these entries get no `tools:` line at all.
+const toolsLine = (a) => (a.tools === '*' ? null : `tools: ${a.tools}`);
+
+module.exports = { AGENTS, toolsLine };

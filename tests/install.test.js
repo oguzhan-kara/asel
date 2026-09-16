@@ -4,7 +4,10 @@ const assert = require('node:assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { install, check } = require('../install');
+const { spawnSync } = require('node:child_process');
+const { install, check, parseArgs } = require('../install');
+
+const INSTALL = path.join(__dirname, '..', 'install.js');
 const { walk } = require('./helpers/walk');
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'asel-'));
@@ -51,4 +54,44 @@ test('global install goes under home and skips rules; check reports drift', () =
   fs.appendFileSync(path.join(home, '.claude', 'skills', 'asel', 'SKILL.md'), '\nlocal edit\n');
   const d = check({ mode: 'global', home, playwrightPrefix: 'mcp__pw' });
   assert.deepStrictEqual(d.modified, ['skills/asel/SKILL.md']);
+});
+
+test('install refuses to touch a settings.json that is not valid JSON', () => {
+  const target = tmp();
+  const settingsFile = path.join(target, '.claude', 'settings.json');
+  fs.mkdirSync(path.join(target, '.claude'), { recursive: true });
+  const broken = '{ not json';
+  fs.writeFileSync(settingsFile, broken);
+
+  assert.throws(
+    () => install({ target, mode: 'project', hooksMode: 'always', playwrightPrefix: 'mcp__pw', home: tmp() }),
+    (e) => e.message.includes(settingsFile) && e.message.includes('not valid JSON; nothing was changed'),
+  );
+  assert.strictEqual(fs.readFileSync(settingsFile, 'utf8'), broken, 'broken settings.json must be left byte-identical');
+
+  const cli = spawnSync(process.execPath, [INSTALL, '--project', target, '--hooks=always'], { encoding: 'utf8' });
+  assert.strictEqual(cli.status, 1, `expected exit 1, got ${cli.status}: ${cli.stdout}${cli.stderr}`);
+  assert.match(cli.stderr, /not valid JSON; nothing was changed/);
+  assert.strictEqual(fs.readFileSync(settingsFile, 'utf8'), broken);
+});
+
+test('parseArgs rejects unknown --hooks values and unrecognised flags', () => {
+  assert.strictEqual(parseArgs(['--project', 'x', '--hooks=always']).hooksMode, 'always');
+  assert.strictEqual(parseArgs(['--project', 'x', '--hooks=skill']).hooksMode, 'skill');
+  assert.throws(() => parseArgs(['--project', 'x', '--hooks=maybe']), /unknown --hooks value: maybe/);
+  assert.throws(() => parseArgs(['--project', 'x', '--verbose']), /unknown option: --verbose/);
+});
+
+test('project install adds .asel-notify-state to an existing .gitignore only', () => {
+  const target = tmp();
+  install({ target, mode: 'project', hooksMode: 'skill', playwrightPrefix: 'mcp__pw', home: tmp() });
+  assert.ok(!fs.existsSync(path.join(target, '.gitignore')), 'installer must not create .gitignore');
+
+  const gitignore = path.join(target, '.gitignore');
+  fs.writeFileSync(gitignore, 'node_modules/\n');
+  install({ target, mode: 'project', hooksMode: 'skill', playwrightPrefix: 'mcp__pw', home: tmp() });
+  assert.strictEqual(fs.readFileSync(gitignore, 'utf8'), 'node_modules/\n.asel-notify-state\n');
+
+  install({ target, mode: 'project', hooksMode: 'skill', playwrightPrefix: 'mcp__pw', home: tmp() });
+  assert.strictEqual(fs.readFileSync(gitignore, 'utf8'), 'node_modules/\n.asel-notify-state\n', 'idempotent');
 });

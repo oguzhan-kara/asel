@@ -104,3 +104,14 @@ test('hook: ignores non-commit commands, blocks on staged secret, passes when di
   const r3 = runHook('quality-scan', input('git commit -m z'), { cwd: d });
   assert.strictEqual(r3.code, 0);
 });
+
+test('the secret exemption is segment-anchored: src/latest/ is not test-like', () => {
+  const secret = "const apiKey = 'sk-live-0123456789abcdef';";
+  const blocked = scanFiles([{ rel: 'src/latest/config.ts', text: secret }], { skipPaths: [] });
+  assert.ok(blocked.blockers.some((b) => /secret/i.test(JSON.stringify(b))), JSON.stringify(blocked));
+
+  for (const rel of ['src/__tests__/x.ts', 'src/x.test.ts', 'tests/x.ts', 'src/fixtures/x.ts', '.env.local']) {
+    const r = scanFiles([{ rel, text: secret }], { skipPaths: [] });
+    assert.deepStrictEqual(r.blockers, [], `${rel} must stay exempt`);
+  }
+});

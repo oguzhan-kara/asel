@@ -79,6 +79,19 @@ Rules:
 - Description: imperative mood, lowercase, no period, max 72 chars
 - If a group has 5+ files or complex changes, add a body with bullet points
 - Body bullets explain WHY, not WHAT
+- Every message ends with the co-author footer
+
+Commit message template (heredoc form — keeps the blank line and the footer intact):
+
+```
+git commit -F - <<'MSG'
+<type>(<scope>): <description>
+
+<optional body>
+
+Co-Authored-By: {{workflow.coAuthor}}
+MSG
+```
 
 ## Step 4: Execute Commits
 

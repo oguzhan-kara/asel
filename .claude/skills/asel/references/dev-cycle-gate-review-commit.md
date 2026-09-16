@@ -9,11 +9,10 @@ Gate is a MANDATORY step. You MUST dispatch the Gate Team Lead via Agent tool. A
 1. Update ROUTEMAP: Step = `Gate`
 2. Update CLAUDE.md session: Step = Gate
 3. Display progress bar (Gate step active)
-4. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls — Asel main session is the only place with Agent dispatch capability; subagents cannot nest-dispatch). All use `subagent_type: "general-purpose"` and explicitly request the opus model at dispatch time (ad-hoc scouts have no agent-definition frontmatter to source a model from).
+4. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls — Asel main session is the only place with Agent dispatch capability; subagents cannot nest-dispatch). Dispatch each by name — `asel-gate-scout-analysis`, `asel-gate-scout-testbuild`, `asel-gate-scout-ui`; model and effort come from the agent definition.
    - Scout Analysis dispatch prompt:
      ```
      You are the Analysis Scout for the Asel Gate team.
-     Read and follow: ~/{{aselRoot}}/asel-gate-scout-analysis
      Story: docs/stories/phase-N/STORY-NNN-*.md
      Plan:  docs/stories/phase-N/STORY-NNN-plan.md
      Implemented files: [list from plan]
@@ -21,13 +20,12 @@ Gate is a MANDATORY step. You MUST dispatch the Gate Team Lead via Agent tool. A
      Maintenance mode: YES|NO
      Return ONLY the <SCOUT-ANALYSIS-FINDINGS> block. Do NOT edit any file.
      ```
-   - Scout Test/Build dispatch prompt: same template but references `scout-testbuild.md` and returns `<SCOUT-TESTBUILD-FINDINGS>`.
-   - Scout UI dispatch prompt: same template but references `scout-ui.md` and returns `<SCOUT-UI-FINDINGS>`. If `has_ui: false`, scout returns empty block (no-op).
+   - Scout Test/Build dispatch prompt: same template, dispatched as `asel-gate-scout-testbuild`, returns `<SCOUT-TESTBUILD-FINDINGS>`.
+   - Scout UI dispatch prompt: same template, dispatched as `asel-gate-scout-ui`, returns `<SCOUT-UI-FINDINGS>`. If `has_ui: false`, scout returns empty block (no-op).
 5. **Collect all 3 findings blocks.** If any scout fails, retry that scout once; if it still fails, note the gap in the Team Lead dispatch.
-6. **Dispatch Gate Team Lead** via Agent tool (`subagent_type: "general-purpose"`):
+6. **Dispatch Gate Team Lead** — `Agent(subagent_type: "asel-gate-lead", prompt: …)`; model and effort come from the agent definition:
    ```
-   You are the Gate Team Lead. Read and follow:
-   ~/{{aselRoot}}/asel-gate-lead
+   You are the Gate Team Lead.
 
    Context:
    - Story: docs/stories/phase-N/STORY-NNN-*.md
@@ -102,7 +100,7 @@ Gate internal fix (2 loops) → ESCALATE
     → Re-dispatch Gate (opus) + append attempts.log
       → PASS → continue
       → ESCALATE → present to user (3 options)
-Hard bound: 3 total re-dispatches per story. The attempts.log file is
+Hard bound: {{workflow.maxRedispatch}} total re-dispatches per story. The attempts.log file is
 the source of truth — survives compaction.
 ```
 
@@ -122,10 +120,9 @@ If you catch yourself running `git commit -m "docs(STORY-NNN): post-review ..."`
    ```
 4. Display progress bar (Review step active)
 
-### Phase 1 — Doc Review (sonnet)
+### Phase 1 — Doc Review
 
-5. Read `asel-reviewer`
-6. Dispatch Reviewer via Agent tool
+5. dispatch `Agent(subagent_type: "asel-reviewer", prompt: …)`; model and effort come from the agent definition
    - Pass: completed story reference, context type "post-story", project root
    - Reviewer runs checks #2-#14 (doc consistency, glossary, architecture, tech debt, mock sweep, etc.)
    - Reviewer also runs check #1 (next story impact) and #10 (story updates) but ONLY reports findings — does NOT edit story files
@@ -273,7 +270,7 @@ NO intermediate commits from Step 4. Every commit in git history has already pas
    - [tests added]
    - Review findings resolved: <count> (deferred: <count>)
 
-   Co-Authored-By: Claude <noreply@anthropic.com>"
+   Co-Authored-By: {{workflow.coAuthor}}"
    ```
 10. Capture commit hash.
 11. **Append step-log:**

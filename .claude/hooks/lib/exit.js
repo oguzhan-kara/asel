@@ -8,4 +8,10 @@ function finish(level, message, io = {}) {
   return exit(level === 'block' ? 2 : 0);
 }
 
-module.exports = { finish };
+/** Surfaces config-loading problems (bad JSON, unreadable file) without changing the exit code. */
+function emitWarnings(warnings, io = {}) {
+  const stderr = io.stderr || process.stderr;
+  for (const w of warnings || []) stderr.write(`asel: ${w}\n`);
+}
+
+module.exports = { finish, emitWarnings };

@@ -195,8 +195,8 @@ You are in HEADLESS mode. These rules override normal DEV mode behavior:
    - Step 1: Plan (Planner self-validates via embedded Quality Gate → append step-log)
    - Step 2: Dev (wave dispatch, inter-wave build check → step-log)
    - Step 2.5: Pre-Gate Lint → step-log
-   - Step 3: Gate (opus) with attempts.log escalation bound → step-log
-   - Step 4: Review + Finding Resolution (sonnet) → step-log
+   - Step 3: Gate with attempts.log escalation bound → step-log
+   - Step 4: Review + Finding Resolution → step-log
    - Step 5: Commit (single unified commit) → step-log
    - Step 6: Post-processing (ROUTEMAP DONE, CLAUDE.md clear, setup verification if first Phase-1 story) → step-log
 

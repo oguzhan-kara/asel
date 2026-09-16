@@ -126,7 +126,7 @@ chore(release): vX.Y.Z
 
 Production marker, consolidated history, release notes.
 
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Co-Authored-By: {{workflow.coAuthor}}
 EOF
 )"
 git push origin main

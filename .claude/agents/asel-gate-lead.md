@@ -345,9 +345,9 @@ Asel orchestrator (main Claude Code session, NOT you) performs scout dispatch. T
 1. Asel reads context (story, plan, ROUTEMAP, decisions.md)
 2. Asel determines `ui_story` and `maintenance_mode` flags
 3. Asel makes **3 parallel Agent tool calls in ONE response** (this is the concurrency point):
-   - Scout Analysis (`subagent_type: "general-purpose"`, dispatch prompt references `asel-gate-scout-analysis`)
-   - Scout Test/Build (references `asel-gate-scout-testbuild`)
-   - Scout UI (references `asel-gate-scout-ui`; if `ui_story: false`, scout returns empty block)
+   - Scout Analysis (`subagent_type: "asel-gate-scout-analysis"`)
+   - Scout Test/Build (`subagent_type: "asel-gate-scout-testbuild"`)
+   - Scout UI (`subagent_type: "asel-gate-scout-ui"`; if `ui_story: false`, scout returns empty block)
 4. Asel collects all 3 structured findings blocks
 5. Asel dispatches YOU (Team Lead / this file) with the 3 raw findings blocks concatenated in your prompt
 6. You do Phases 0-5 above and return summary to Asel
@@ -359,8 +359,7 @@ Asel orchestrator (main Claude Code session, NOT you) performs scout dispatch. T
 When Asel dispatches YOU as Team Lead, the prompt should include:
 
 ```
-You are the Gate Team Lead. Read and follow:
-~/{{aselRoot}}/asel-gate-lead
+You are the Gate Team Lead.
 
 Context:
 - Story: docs/stories/phase-2/STORY-042-add-user-roles.md

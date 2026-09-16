@@ -1,7 +1,6 @@
 ---
 name: asel-developer
 description: Implements one plan task at a time with tests, following the story plan and architecture.
-tools: *
 model: {{agents.developer.model}}
 effort: {{agents.developer.effort}}
 skills: frontend-design

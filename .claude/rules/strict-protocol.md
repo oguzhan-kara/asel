@@ -39,7 +39,7 @@ Same pipeline as Normal Mode: **Plan → Dev (waves) → Lint → Gate → Revie
 - Ana Asel dispatches ALL steps directly (no intermediate orchestrator)
 - Stories are NEVER batched or parallelized
 - Autocompact handles context — NEVER stop, pause, or warn about context
-- Attempt counter hard bound: 3 re-dispatches per story, enforced via `attempts.log`
+- Attempt counter hard bound: {{workflow.maxRedispatch}} re-dispatches per story, enforced via `attempts.log`
 
 ### Phase Boundaries
 Phase Gate is MANDATORY between every phase transition. No exceptions.

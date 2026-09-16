@@ -19,11 +19,9 @@ Projenin mevcut Asel standartlarına uygunluğunu kontrol eder, sorunları tespi
 
 ## Cross-Skill Path Convention
 
-Bu skill agent prompt'larına erişirken **asel skill** dizinini kullanır (kendi dizininde `agents/` yoktur). Dispatch sırasında path'ler:
-- Project path: `{{aselRoot}}/agents/<agent-prompt>.md`
-- Global fallback: `~/{{aselRoot}}/agents/<agent-prompt>.md`
-
-Bu dokümanda `agents/X.md` kısa formu yazıldığında, bunu `{{aselRoot}}/agents/X.md` (veya global fallback) olarak çözümleyin.
+Bu skill kendi dizininde agent tanımı tutmaz. Agent'lar **isimle** dispatch edilir —
+`Agent(subagent_type: "asel-<role>", prompt: …)`; model ve effort agent tanımından gelir.
+Ayrıca bir prompt dosyası okunmaz.
 
 ## Process
 
@@ -164,8 +162,7 @@ Infra scan raporlanır, user'a bilgi amaçlı gösterilir — henüz onay istenm
 Compliance Auditor **Dim 1 + Dim 2 + Leftover Findings Sweep**'i tek bir dispatch'te yapar. Checkup bunları kendi içinde tekrar etmez — Auditor'un 7 inventory'sine güvenir.
 </EXTREMELY-IMPORTANT>
 
-1. Read `{{aselRoot}}/asel-compliance-auditor` (global fallback: `~/{{aselRoot}}/asel-compliance-auditor`)
-2. Dispatch Compliance Auditor via Agent tool
+1. `Agent(subagent_type: "asel-compliance-auditor", prompt: …)` ile dispatch et; model ve effort agent tanımından gelir
    - Pass: project root, CLAUDE.md path, `trigger_mode: CHECKUP`
 3. Auditor runs (5-10 dakika):
    - Step 1: 7 inventory (5 forward: endpoint/schema/screen/component/BR + 1f feature coverage + 1g leftover findings)
@@ -289,14 +286,14 @@ User "evet" / "düzelt" derse, sırayla:
 ### Step 5: DevOps Tuning (if missing)
 
 `docs/reports/infra-tuning.md` yoksa:
-1. DevOps Agent'ı dispatch et — Read `{{aselRoot}}/asel-devops` (global fallback: `~/{{aselRoot}}/asel-devops`), mode: mid-project
+1. DevOps Agent'ı dispatch et — `Agent(subagent_type: "asel-devops", prompt: …)`, mode: mid-project; model ve effort agent tanımından gelir
 2. Agent infra'yı tune eder, rapor yazar
 
 ### Step 6: Setup Verification (always)
 
 Her zaman en son çalışır:
 1. `make down` → `make build` → `make up` (uygulama ayağa kalkmazsa up et)
-2. Setup Verifier Agent'ı dispatch et — Read `{{aselRoot}}/asel-setup-verifier` (global fallback: `~/{{aselRoot}}/asel-setup-verifier`)
+2. Setup Verifier Agent'ı dispatch et — `Agent(subagent_type: "asel-setup-verifier", prompt: …)`; model ve effort agent tanımından gelir
 3. Agent raporlar → `docs/reports/setup-verification.md`
 4. FAIL olursa fix loop dene (max 2)
 

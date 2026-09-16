@@ -2,16 +2,17 @@
 'use strict';
 const path = require('path');
 const { readInput } = require('./lib/input');
-const { finish } = require('./lib/exit');
+const { finish, emitWarnings } = require('./lib/exit');
 const { loadConfig, guard } = require('./lib/config');
 const { doneIdsIn } = require('./lib/routemap');
 const { checkStoryEvidence } = require('./lib/evidence');
-const { resolveTarget, readCurrent, proposeDocument } = require('./lib/edit');
+const { resolveTarget, readCurrent, proposeDocument, isRoutemapEdit } = require('./lib/edit');
 
 const input = readInput();
-const { config } = loadConfig(input.cwd);
+const { config, warnings } = loadConfig(input.cwd);
+emitWarnings(warnings);
 const g = guard(config, 'storyDoneGuard', input.event || 'PreToolUse');
-if (!g.enabled || !/routemap/i.test(input.filePath)) finish('warn', '');
+if (!g.enabled || !isRoutemapEdit(input, config)) finish('warn', '');
 
 const target = resolveTarget(input, config.paths.routemap);
 const current = readCurrent(target);
@@ -25,6 +26,8 @@ if (transitioning.length === 0) finish('warn', '');
 const failures = [];
 for (const id of transitioning) {
   const r = checkStoryEvidence(input.cwd, config.paths, id);
+  // Onboarded and AUDIT-GAP rows legitimately have no story file: pass, but say so.
+  if (!r.storyFile) { process.stderr.write(`story-done-guard: no story file found for ${id} under ${config.paths.stories}; evidence not checked\n`); continue; }
   if (r.missing.length) failures.push(`  ${id}:\n` + r.missing.map((m) => `    - ${m}`).join('\n'));
 }
 if (failures.length === 0) finish('warn', '');

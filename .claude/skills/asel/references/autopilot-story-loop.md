@@ -40,7 +40,7 @@ Execute Steps 1 through 2.5 from `dev-cycle.md` — same steps, same wave logic,
 Update ROUTEMAP: Step = `Gate`
 
 **First Gate dispatch:**
-1. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls) — the three scout subagents `asel-gate-scout-analysis`, `asel-gate-scout-testbuild`, `asel-gate-scout-ui` (dispatched by name with the Agent tool) — explicitly request the opus model at dispatch time if the agent definition does not already pin one. See `phases/development/dev-cycle.md` Step 3 for full dispatch prompt templates.
+1. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls) — the three scout subagents `asel-gate-scout-analysis`, `asel-gate-scout-testbuild`, `asel-gate-scout-ui` (dispatched by name with the Agent tool); model and effort come from the agent definition. See `phases/development/dev-cycle.md` Step 3 for full dispatch prompt templates.
 2. **Collect all 3 findings blocks**. Retry any failed scout once.
 3. **Dispatch Gate Team Lead** via Agent tool with story/plan paths + all 3 raw scout findings blocks embedded in prompt. Lead does merge → FIX → verify → writes `docs/stories/phase-N/STORY-NNN-gate.md` → returns summary.
    - Legacy fallback: `asel-legacy-gate` (monolithic, no team) if team architecture misbehaves.
@@ -80,7 +80,7 @@ Gate internal fix (2 loops) → ESCALATE
     → Re-dispatch Gate (opus) + append attempts.log
       → PASS → continue
       → ESCALATE → present to user (3 options)
-Hard bound: 3 total re-dispatches per story. Source of truth: attempts.log.
+Hard bound: {{workflow.maxRedispatch}} total re-dispatches per story. Source of truth: attempts.log.
 ```
 
 ### Step 4: Review + Finding Resolution (sequential, BEFORE commit)
@@ -102,7 +102,7 @@ Review runs BEFORE Commit. AUTOPILOT uses the SAME sequential protocol as Normal
    - `REVIEW_EXISTS` → proceed
    - `REVIEW_MISSING` → append attempts.log + re-dispatch Reviewer (sonnet, explicit Write instruction)
    - Still missing → append attempts.log + re-dispatch with an explicit opus model override
-   - Still missing (attempts.log ≥ 3 total) → STOP autopilot, escalate to user
+   - Still missing (attempts.log ≥ {{workflow.maxRedispatch}} total) → STOP autopilot, escalate to user
 3. **Do NOT commit Review's doc edits here.** They land in Step 5.
 
 **Phase 2: Story Impact (opus — deterministic trigger)**
@@ -169,7 +169,7 @@ ONE commit per story. Captures: story code (Step 2) + Review doc edits (Step 4 P
    - [tests added]
    - Review findings resolved: <count> (deferred: <count>)
 
-   Co-Authored-By: Claude <noreply@anthropic.com>"
+   Co-Authored-By: {{workflow.coAuthor}}"
    ```
 7. Capture commit hash, append step-log `STEP_5 COMMIT: EXECUTED | items=1 commit=<hash> | result=PASS`.
 
