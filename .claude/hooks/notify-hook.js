@@ -6,6 +6,7 @@ const { readInput } = require('./lib/input');
 const { loadConfig } = require('./lib/config');
 const { parseRoutemap, progress } = require('./lib/routemap');
 const { sendTelegram } = require('./lib/notify');
+const { resolveTarget, readCurrent } = require('./lib/edit');
 
 const STATE_FILE = '.asel-notify-state';
 
@@ -40,6 +41,7 @@ function computeEvents(rm, state, cwd, paths) {
   const pr = progress(rm);
   const tail = `Toplam: ${pr.done}/${pr.total} (%${pr.pct})`;
   const push = (key, message) => { if (!state.has(key)) events.push({ key, message }); };
+  const inPhase = new Set(rm.phases.flatMap((p) => p.stories.map((s) => s.id)));
   for (const p of rm.phases) {
     const done = p.stories.filter((s) => s.done).length;
     for (const s of p.stories) {
@@ -48,6 +50,12 @@ function computeEvents(rm, state, cwd, paths) {
       if (a[0] === '✗') continue; // premature ROUTEMAP edit; wait for next edit
       push(`STORY:${s.id}`, `📋 *${rm.project}*\n${s.id}: ${s.title} ✓\nPlan ${a[0]} | Gate ${a[1]} | Deliv ${a[2]} | Review ${a[3]}\nPhase ${p.number}: ${done}/${p.stories.length} — ${tail}`);
     }
+  }
+  for (const s of rm.stories) {
+    if (!s.done || inPhase.has(s.id)) continue;
+    const a = ['plan', 'gate', 'deliverable', 'review'].map((x) => artifact(cwd, paths, s.id, x));
+    if (a[0] === '✗') continue;
+    push(`STORY:${s.id}`, `📋 *${rm.project}*\n${s.id}: ${s.title} ✓\nPlan ${a[0]} | Gate ${a[1]} | Deliv ${a[2]} | Review ${a[3]}\nPhase —: — — ${tail}`);
   }
   for (const s of rm.stories) {
     if (s.escalated) push(`ESCALATED:${s.id}`, `⚠️ *${rm.project}*\n${s.id}: ${s.title} — ESCALATED\nMüdahale gerekli\n${tail}`);
@@ -66,9 +74,10 @@ async function main() {
   const input = readInput();
   if (!/routemap/i.test(input.filePath)) return;
   const { config } = loadConfig(input.cwd);
-  const rmFile = path.join(input.cwd, config.paths.routemap);
-  if (!fs.existsSync(rmFile)) return;
-  const rm = parseRoutemap(fs.readFileSync(rmFile, 'utf8'));
+  const target = resolveTarget(input, config.paths.routemap);
+  const current = readCurrent(target);
+  if (!current) return;
+  const rm = parseRoutemap(current);
   const stateFile = path.join(input.cwd, STATE_FILE);
   if (!fs.existsSync(stateFile)) { fs.writeFileSync(stateFile, seedState(rm).join('\n') + '\n'); return; }
   const state = new Set(fs.readFileSync(stateFile, 'utf8').split(/\r?\n/).filter(Boolean));
