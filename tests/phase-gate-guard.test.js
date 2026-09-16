@@ -32,3 +32,18 @@ test('silent when phase incomplete, and never exits 2 even if configured block',
   assert.strictEqual(r.code, 0);
   assert.match(r.stderr, /downgraded to warn/);
 });
+
+test('with block configured and incomplete phase, stderr is empty', () => {
+  const d = proj('| STORY-003 | A | S | [x] DONE | — |\n| STORY-004 | B | S | [ ] PENDING | — |');
+  fs.writeFileSync(path.join(d, 'asel.config.json'), JSON.stringify({ guards: { phaseGateGuard: { level: 'block' } } }));
+  assert.strictEqual(runHook('phase-gate-guard', post(d)).stderr, '');
+});
+
+test('complete phase with absolute file_path prints warning', () => {
+  const d = proj('| STORY-003 | A | S | [x] DONE | — |');
+  const absPath = path.join(d, 'docs', 'ROUTEMAP.md');
+  const input = { hook_event_name: 'PostToolUse', tool_name: 'Edit', cwd: d, tool_input: { file_path: absPath } };
+  const r = runHook('phase-gate-guard', input);
+  assert.strictEqual(r.code, 0);
+  assert.match(r.stderr, /Phase 2/);
+});

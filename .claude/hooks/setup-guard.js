@@ -6,20 +6,24 @@ const { readInput } = require('./lib/input');
 const { finish } = require('./lib/exit');
 const { loadConfig, guard } = require('./lib/config');
 const { parseRoutemap } = require('./lib/routemap');
+const { resolveTarget, readCurrent, proposeDocument } = require('./lib/edit');
 
 const input = readInput();
 const { config } = loadConfig(input.cwd);
 const g = guard(config, 'setupGuard', input.event || 'PreToolUse');
 if (!g.enabled || !/routemap/i.test(input.filePath)) finish('warn', '');
 
-const proposed = input.newString || input.content || '';
-const starting = parseRoutemap(proposed).stories.some((s) => s.inProgress);
+const target = resolveTarget(input, config.paths.routemap);
+const current = readCurrent(target);
+const proposed = proposeDocument(input, current);
+if (proposed === null) finish('warn', '');
+
+const before = new Set(parseRoutemap(current).stories.filter((s) => s.inProgress).map((s) => s.id));
+const starting = parseRoutemap(proposed).stories.some((s) => s.inProgress && !before.has(s.id));
 if (!starting) finish('warn', '');
 
-const rmFile = input.filePath ? path.join(input.cwd, input.filePath) : path.join(input.cwd, config.paths.routemap);
-if (!fs.existsSync(rmFile)) finish('warn', '');
-const current = parseRoutemap(fs.readFileSync(rmFile, 'utf8'));
-const phase1 = current.phases.find((p) => p.number === 1);
+const rm = parseRoutemap(current);
+const phase1 = rm.phases.find((p) => p.number === 1);
 if (!phase1 || !phase1.stories.some((s) => s.done)) finish('warn', '');
 
 const reports = path.join(input.cwd, config.paths.reports);

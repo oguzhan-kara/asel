@@ -34,3 +34,26 @@ test('passes when the edit does not start a story or Phase 1 has no DONE story',
   fs.writeFileSync(path.join(d, 'docs', 'ROUTEMAP.md'), CURRENT.replace('[x] DONE', '[~] IN PROGRESS'));
   assert.strictEqual(runHook('setup-guard', edit(d, '| STORY-002 | B | S | [~] IN PROGRESS | Plan |')).code, 0);
 });
+
+test('surgical edit that starts a story is blocked', () => {
+  const d = proj();
+  const r = runHook('setup-guard', edit(d, '| STORY-002 | B | S | [~] IN PROGRESS | Plan |'));
+  assert.strictEqual(r.code, 2);
+  assert.match(r.stderr, /infra-tuning\.md/);
+});
+
+test('with STORY-002 already IN PROGRESS, changing its Step passes', () => {
+  const d = proj();
+  fs.writeFileSync(path.join(d, 'docs', 'ROUTEMAP.md'), CURRENT.replace('[ ] PENDING', '[~] IN PROGRESS'));
+  const r = runHook('setup-guard', edit(d, '| STORY-002 | B | S | [~] IN PROGRESS | Dev |'));
+  assert.strictEqual(r.code, 0);
+});
+
+test('absolute file_path is resolved correctly and blocks', () => {
+  const d = proj();
+  const absPath = path.join(d, 'docs', 'ROUTEMAP.md');
+  const input = { hook_event_name: 'PreToolUse', tool_name: 'Edit', cwd: d, tool_input: { file_path: absPath, old_string: '| STORY-002 | B | S | [ ] PENDING | — |', new_string: '| STORY-002 | B | S | [~] IN PROGRESS | Plan |' } };
+  const r = runHook('setup-guard', input);
+  assert.strictEqual(r.code, 2);
+  assert.match(r.stderr, /infra-tuning\.md/);
+});
