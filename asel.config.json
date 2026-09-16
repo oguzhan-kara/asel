@@ -1,0 +1,173 @@
+{
+  "language": {
+    "conversation": "tr",
+    "documents": "en"
+  },
+  "paths": {
+    "docs": "docs",
+    "routemap": "docs/ROUTEMAP.md",
+    "stories": "docs/stories",
+    "reports": "docs/reports",
+    "usertest": "docs/USERTEST.md",
+    "claudeMd": "CLAUDE.md"
+  },
+  "workflow": {
+    "autopilot": false,
+    "reviewBeforeCommit": true,
+    "phaseGateRequired": true,
+    "maxRedispatch": 3,
+    "coAuthor": "Claude <noreply@anthropic.com>"
+  },
+  "agents": {
+    "planner": {
+      "model": "opus",
+      "effort": "xhigh"
+    },
+    "developer": {
+      "model": "sonnet",
+      "effort": "high",
+      "escalationModel": "opus"
+    },
+    "gate-lead": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "gate-scout-analysis": {
+      "model": "sonnet",
+      "effort": "medium"
+    },
+    "gate-scout-testbuild": {
+      "model": "sonnet",
+      "effort": "medium"
+    },
+    "gate-scout-ui": {
+      "model": "sonnet",
+      "effort": "medium"
+    },
+    "reviewer": {
+      "model": "sonnet",
+      "effort": "medium"
+    },
+    "phase-gate": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "devops": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "setup-verifier": {
+      "model": "opus",
+      "effort": "medium"
+    },
+    "deploy-engineer": {
+      "model": "sonnet",
+      "effort": "medium"
+    },
+    "seed-generator": {
+      "model": "opus",
+      "effort": "medium"
+    },
+    "e2e-tester": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "test-hardener": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "perf-optimizer": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "ui-polisher": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "acceptance-tester": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "compliance-auditor": {
+      "model": "opus",
+      "effort": "xhigh"
+    },
+    "legacy-gate": {
+      "model": "opus",
+      "effort": "high"
+    }
+  },
+  "guards": {
+    "qualityScan": {
+      "enabled": true,
+      "level": "block",
+      "skipPaths": [
+        "**/__tests__/**",
+        "**/*.test.*",
+        "**/fixtures/**",
+        "docs/**"
+      ]
+    },
+    "gateGuard": {
+      "enabled": true,
+      "level": "block"
+    },
+    "storyDoneGuard": {
+      "enabled": true,
+      "level": "block"
+    },
+    "setupGuard": {
+      "enabled": true,
+      "level": "block"
+    },
+    "phaseGateGuard": {
+      "enabled": true,
+      "level": "warn"
+    },
+    "skillGuard": {
+      "enabled": true,
+      "level": "block",
+      "userOnlySkills": [
+        "asel-setup",
+        "asel-help",
+        "asel-changelog",
+        "asel-commit",
+        "asel-checkup",
+        "asel-codex-review"
+      ]
+    },
+    "stopCheck": {
+      "enabled": true,
+      "level": "warn"
+    }
+  },
+  "notifications": {
+    "telegram": {
+      "enabled": false,
+      "tokenEnv": "ASEL_TELEGRAM_BOT_TOKEN",
+      "chatIdsEnv": "ASEL_TELEGRAM_CHAT_IDS",
+      "timeoutMs": 5000
+    }
+  },
+  "rules": {
+    "backend": [
+      "backend/**",
+      "sdk/**",
+      "**/*.java",
+      "**/*.go",
+      "**/*.py"
+    ],
+    "frontend": [
+      "frontend/**",
+      "**/*.tsx",
+      "**/*.jsx"
+    ],
+    "infra": [
+      "infra/**",
+      "docker-compose*.yml",
+      "Makefile",
+      ".env*",
+      "package.json"
+    ]
+  }
+}
