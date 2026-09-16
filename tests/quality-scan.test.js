@@ -51,12 +51,19 @@ test('skipPaths exempt secrets only, never SQL/XSS', () => {
 });
 
 test('a leading comment does not hide code on the same line', () => {
-  const text = ['/* noop */ el.innerHTML = html;', '/* c */ window.confirm("x");', '{/* c */} <input value={x} />', '// <input /> real comment'].join('\n');
+  const text = [
+    '/* noop */ el.innerHTML = html;',
+    '/* c */ window.confirm("x");',
+    '{/* c */} <input value={x} />',
+    '// <input /> real comment',
+    '/* c */ window.confirm("y"); /* end */',
+    '/* a */ <input value={y} /> /* b */'
+  ].join('\n');
   const r = scanFiles([{ rel: 'src/pages/Q.tsx', text }], { skipPaths: SKIP });
-  assert.strictEqual(r.blockers.length, 3, JSON.stringify(r));
-  assert.ok(r.blockers.some((b) => /RAW HTML INJECTION/.test(b)));
-  assert.ok(r.blockers.some((b) => /NATIVE BROWSER DIALOG/.test(b)));
-  assert.ok(r.blockers.some((b) => /RAW HTML ELEMENT/.test(b)));
+  assert.strictEqual(r.blockers.length, 5, JSON.stringify(r));
+  assert.strictEqual(r.blockers.filter((b) => /RAW HTML INJECTION/.test(b)).length, 1);
+  assert.strictEqual(r.blockers.filter((b) => /NATIVE BROWSER DIALOG/.test(b)).length, 2);
+  assert.strictEqual(r.blockers.filter((b) => /RAW HTML ELEMENT/.test(b)).length, 2);
 });
 
 test('non-shadcn and native dialog rules apply to all js-like files, not just react', () => {
@@ -78,13 +85,19 @@ test('hook: ignores non-commit commands, blocks on staged secret, passes when di
   const r = runHook('quality-scan', input('git commit -m x'), { cwd: d });
   assert.strictEqual(r.code, 2);
   assert.match(r.stderr, /HARDCODED SECRET/);
-  // Reset and test renamed file detection
-  execSync('git reset --soft HEAD~0 || true', { cwd: d });
+
+  // Test with a real rename: establish history so git can detect a rename
+  fs.writeFileSync(path.join(d, 'src', 'k.ts'), ['// line 1', '// line 2', '// line 3', '// line 4', '// line 5', 'export const a = 1;'].join('\n') + '\n');
+  execSync('git add -A && git commit -q -m init', { cwd: d });
   execSync('git mv src/k.ts src/k2.ts', { cwd: d });
+  fs.appendFileSync(path.join(d, 'src', 'k2.ts'), "export const secret = 'supersecretvalue';\n");
   execSync('git add -A', { cwd: d });
-  const r2 = runHook('quality-scan', input('git commit -m y'), { cwd: d });
-  assert.strictEqual(r2.code, 2, `renamed file should still be blocked: ${r2.stderr}`);
-  assert.match(r2.stderr, /HARDCODED SECRET/);
+  const status = execSync('git diff --cached --name-status -M', { cwd: d, encoding: 'utf8' });
+  assert.match(status, /^R\d*\s/m, 'fixture must stage a rename: ' + status);
+  const rr = runHook('quality-scan', input('git commit -m x'), { cwd: d });
+  assert.strictEqual(rr.code, 2);
+  assert.match(rr.stderr, /HARDCODED SECRET/);
+
   // Test disabled config
   execSync('git reset --soft HEAD~0 || true', { cwd: d });
   fs.writeFileSync(path.join(d, 'asel.config.json'), JSON.stringify({ guards: { qualityScan: { enabled: false } } }));
