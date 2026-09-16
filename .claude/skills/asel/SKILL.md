@@ -1,6 +1,6 @@
 ---
 name: asel
-description: Project lifecycle orchestrator. Invoke to start, continue, or manage any project phase. Full lifecycle: Planning → Development → E2E & Polish → Documentation → Release & Maintenance.
+description: "Project lifecycle orchestrator. Invoke to start, continue, or manage any project phase. Full lifecycle: Planning → Development → E2E & Polish → Documentation → Release & Maintenance."
 hooks:
   PreToolUse:
     - matcher: "Bash"
@@ -79,6 +79,10 @@ When mode is determined, **Read** the corresponding phase file and follow its in
 
 All Asel resources live under `{{aselRoot}}/`; agent reference material under `{{aselRoot}}/references/`. When a phase file uses a short form like `agents/X.md` or `phases/Y.md`, resolve relative to `{{aselRoot}}/`.
 
+## Scale and Project-Type Adaptations
+
+> Read `{{aselRoot}}/references/orchestrator-adaptations.md` when starting Planning Step 5 (architecture) or Step 6 (screens); it decides file splitting by scale and the per-project-type focus (mock adapter layer, Frontend-First for web-app/fullstack).
+
 ## CONTINUE Mode — Read ROUTEMAP
 
 ALWAYS read ROUTEMAP to determine progress. Never guess from file existence.
@@ -130,9 +134,10 @@ Step column mapping (Development — Normal Mode):
 - Failed → Agent failed — show error, wait for user
 
 Step column mapping (Development — AUTOPILOT / HEADLESS Mode):
-Same steps as Normal Mode, just skips user approval and does not wait between stories. HEADLESS
-additionally runs each story in a fresh `claude -p` sub-session; from ROUTEMAP's perspective it
-looks identical to an AUTOPILOT story.
+Same steps as Normal Mode, just skips user approval and does not wait between stories. The
+orchestrator sets `- Mode: HEADLESS` in the CLAUDE.md `## Asel Session` block at loop start.
+HEADLESS additionally runs each story in a fresh `claude -p` sub-session; from ROUTEMAP's
+perspective it looks identical to an AUTOPILOT story.
 
 **Pipeline order** (all three modes): `Plan → Dev → Lint → Gate → Review → Commit → Handoff`. Review
 ALWAYS runs before Commit so a single, clean git commit captures story code + Review-driven fixes.
@@ -214,6 +219,7 @@ Display at EVERY step transition. **Update ROUTEMAP DONE before asking user abou
 | Using Asel on existing project without onboarding | Missing docs, broken references | Always run ONBOARD mode first |
 | Skipping brainstorming or gap analysis for "simple" projects | Unexamined assumptions, missing functionality discovered mid-dev | Every project gets discovery and gap analysis |
 | Starting development without all planning docs | Missing context causes rework | Complete planning first |
+| Forgetting to update decisions.md | Agents lose context, decisions forgotten | Every agent updates it |
 | Editing docs directly during mid-project changes | Missed dependencies, broken stories | Always go through Change Analyst (`phases/change/change-analysis.md`) |
 | Manual typecheck instead of Gate | Gate has multiple passes — `tsc` is NOT Gate | ALWAYS dispatch the gate team (scouts, then `asel-gate-lead`); `asel-legacy-gate` is fallback only |
 | Running stories in parallel (AUTOPILOT) | Stories have inter-dependencies, parallel causes conflicts | Stories ALWAYS sequential — one at a time |
@@ -226,6 +232,7 @@ Display at EVERY step transition. **Update ROUTEMAP DONE before asking user abou
 | Direct commit/push to `main` after release for code changes | Bypasses review gate, breaks audit trail | All post-release CODE changes go through GitHub issue + worktree + PR + user-approved squash merge — see `phases/maintain/github-flow.md` |
 | Auto-merging PRs in autopilot | User mandate: merges always need human approval | Plans auto-approve, merges do NOT, even in autopilot |
 | Working on `main` for maintenance fixes | Dirties primary working directory, regression risk | Each maintain item runs in its own worktree (`.claude/worktrees/<ID>`) |
+| Editing ROUTEMAP during maintain | Conflicts with "no direct main commits" rule, drift risk vs GitHub state | Open maintenance state lives in GitHub Issues + PRs only. ROUTEMAP receives a consolidated history block ONLY at release time |
 | Dispatching agents without WORKTREE context block (post-release) | Agents work on stale main code, regression check is meaningless | Prepare each dispatch with both `cd <WORKTREE>` and a `WORKTREE: <path>` context block |
 | Skipping DevOps Agent | Infra runs with defaults, perf degrades as data grows | ALWAYS dispatch DevOps before Setup Verifier |
 
