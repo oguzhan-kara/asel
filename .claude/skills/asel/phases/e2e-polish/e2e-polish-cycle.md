@@ -44,7 +44,7 @@ Each step follows the same pattern:
 │                                                                   │
 │  For each step (E1 → E2 → E3 → E4):                              │
 │                                                                   │
-│  1. DISPATCH AGENT (Agent tool, model: "opus")                     │
+│  1. DISPATCH AGENT (Agent tool)                     │
 │     Read agents/[name]-prompt.md → pass to Agent tool              │
 │     Agent runs in isolated context (no main context bloat)        │
 │     Agent writes report → docs/reports/[name]-report.md           │
@@ -97,7 +97,7 @@ Each step follows the same pattern:
 ```
 
 <EXTREMELY-IMPORTANT>
-E2E & Polish agents run with `model: "opus"`. This is NOT optional.
+E2E & Polish agents (model comes from the agent definition).
 Each agent writes a REPORT FILE — Asel reads the report for fix dispatch, NOT the agent's raw output.
 User approval happens in main context (Asel) based on agent's summary.
 Fix loops are coordinated by Asel (not by the agent itself).

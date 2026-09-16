@@ -72,10 +72,10 @@ Lightest process — no plan file, no investigation. Still goes through full Git
 1. **GH-1** — `gh issue create --label hotfix --title "HOTFIX-NNN: <title>" --body-file …` (template: `templates/issue-hotfix.md`)
 2. **GH-2** — `git worktree add .claude/worktrees/HOTFIX-NNN -b hotfix/hotfix-nnn-<slug> origin/main`
 3. **GH-3** — Pipeline body inside worktree:
-   - Dispatch Developer agent (Task, model: "sonnet"):
+   - Dispatch Developer agent (Agent):
      - Context: bug description, affected file(s), architecture guard rules, **WORKTREE block**
      - Developer reads code, makes minimal fix, runs ALL existing tests, fixes any failures
-   - Dispatch Gate agent (Task, model: "opus"):
+   - Dispatch Gate agent (Agent):
      - Verify: build passes, ALL existing tests pass (regression-clean), no pattern violations
      - Gate runs inside worktree (cwd via pre-dispatch `cd`, plus WORKTREE context block)
 4. **GH-4** — Commit `fix(HOTFIX-NNN): <title>` inside worktree (heredoc with Closes # + Co-Authored-By)
@@ -91,13 +91,13 @@ Medium process — investigation + lightweight plan + Bug Fix TDD.
 1. **GH-1** — `gh issue create --label bug --title "BUG-NNN: <title>" --body-file …` (template: `templates/issue-bug.md`)
 2. **GH-2** — `git worktree add .claude/worktrees/BUG-NNN -b fix/bug-nnn-<slug> origin/main`
 3. **GH-3** — Pipeline body inside worktree:
-   - Dispatch Planner agent in **FIX mode** (Task, model: "opus"):
+   - Dispatch Planner agent in **FIX mode** (Agent):
      - Context: error description, **WORKTREE block**, architecture guard
      - Planner investigates: reads code at WORKTREE, traces code paths, finds root cause
      - Output: `docs/maintenance/BUG-NNN-<slug>.md` (lightweight fix plan, written inside worktree → carries into the PR)
      - Return: summary for user approval
    - User approves fix plan (autopilot: auto-approve plans — but **NOT** PR merge in GH-6)
-   - Dispatch Developer agent (Task, model: "sonnet") — **Bug Fix TDD**:
+   - Dispatch Developer agent (Agent) — **Bug Fix TDD**:
      - Context: fix plan file + architecture guard rules + **WORKTREE block**
      - Developer follows Bug Fix TDD protocol:
        a. Write a failing test that reproduces the bug
@@ -105,7 +105,7 @@ Medium process — investigation + lightweight plan + Bug Fix TDD.
        c. Implement the fix
        d. Run test → confirm it PASSES (proves fix works)
        e. Run all tests → confirm no regressions
-   - Dispatch Gate agent (Task, model: "opus"):
+   - Dispatch Gate agent (Agent):
      - Full gate: build, tests, regression, pattern compliance — runs inside worktree
      - Gate verifies: reproduction test exists AND passes
    - E2E regression test (deploy + smoke + affected flows) inside worktree context
@@ -128,12 +128,12 @@ Full process — impact analysis + full plan.
      - If breaking → require ADR + user approval before proceeding
      - Change Plan with affected files, written inside worktree at `docs/maintenance/ENH-NNN-impact.md`
    - User approves change plan (autopilot: auto-approve plan, NOT merge)
-   - Dispatch Planner agent (Task, model: "opus"):
+   - Dispatch Planner agent (Agent):
      - Full story-style plan: `docs/maintenance/ENH-NNN-<slug>.md` (inside worktree)
    - User approves implementation plan (autopilot: auto-approve plan, NOT merge)
-   - Dispatch Developer agent (Task, model: "sonnet"):
+   - Dispatch Developer agent (Agent):
      - Full implementation with architecture guard, runs inside worktree
-   - Dispatch Gate agent (Task, model: "opus"):
+   - Dispatch Gate agent (Agent):
      - Full gate including regression + visual quality, runs inside worktree
    - E2E regression test inside worktree context
 4. **GH-4** — Commit `feat(ENH-NNN): <title>` inside worktree (heredoc with Closes # + Co-Authored-By)

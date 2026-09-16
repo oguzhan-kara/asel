@@ -10,7 +10,7 @@ const AGENTS = [
   { role: 'gate-scout-testbuild', source: 'agents/gate-team/scout-testbuild.md', description: 'Runs build and tests for the quality gate; reports failures.', tools: `${RO}, Bash` },
   { role: 'gate-scout-ui', source: 'agents/gate-team/scout-ui.md', description: 'Browser-based UI scout for the quality gate.', tools: `${RO}, Bash, ${PW}` },
   { role: 'reviewer', source: 'agents/reviewer-prompt.md', description: 'Consistency review of story code vs docs; writes the review report with findings.', tools: `${RO}, Write` },
-  { role: 'phase-gate', source: 'agents/phase-gate-prompt.md', description: 'Phase boundary gate: deploy, smoke, E2E, compliance; writes phase gate report.', tools: `${RO}, Bash, Write, Edit, ${PW}` },
+  { role: 'phase-gate', source: 'agents/phase-gate-prompt.md', description: 'Phase boundary gate (deploy, smoke, E2E, compliance); writes the phase gate report.', tools: `${RO}, Bash, Write, Edit, ${PW}` },
   { role: 'devops', source: 'agents/devops-prompt.md', description: 'Tunes infrastructure (Docker, DB, cache) after Phase 1 first story; writes infra-tuning report.', tools: `${RO}, Bash, Write, Edit` },
   { role: 'setup-verifier', source: 'agents/setup-verifier-prompt.md', description: 'Verifies a fresh setup works end to end; writes setup-verification report.', tools: `${RO}, Bash, Write, Edit` },
   { role: 'deploy-engineer', source: 'agents/deploy-engineer-prompt.md', description: 'Builds and deploys via Makefile/compose on demand.', tools: `${RO}, Bash, Write, Edit` },

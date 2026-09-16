@@ -17,11 +17,17 @@ const REPLACEMENTS = [
   [/via Task tool/g, 'via Agent tool'],
   [/Task tool/g, 'Agent tool'],
   [/\bTask\(/g, 'Agent('],
+  [/\bTask(?= (?:calls?|dispatch(?:es|ed)?|prompts?|invocations?)\b)/g, 'Agent'],
+  [/\bTask-based\b/g, 'Agent-based'],
+  [/\(Task, /g, '(Agent, '],
   [/`dev-browser`|dev-browser/g, 'Playwright MCP tools ({{playwrightPrefix}}__browser_*)'],
   [/~\/\.claude\/skills\/amil\/scripts\/notify-telegram\.sh "\$MESSAGE"/g, 'node "{{hookRoot}}/notify-cli.js" "$MESSAGE"'],
   [/\.claude\/skills\/amil\//g, '{{aselRoot}}/'],
   [/\bAmil\b/g, 'Asel'], [/\bamil\b/g, 'asel'], [/\bAMIL\b/g, 'ASEL'],
   [/\s*\(`?model: "(opus|sonnet)"`?\)/g, ''],
+  [/\((Agent tool|Agent), `?model: "(?:opus|sonnet)"`?\)/g, '($1)'],
+  [/,\s*`?model: "(?:opus|sonnet)"`?(?=\))/g, ''],
+  [/ run with `model: "(?:opus|sonnet)"`\. This is NOT optional\./g, ' (model comes from the agent definition).'],
 ];
 
 function port(text) { return REPLACEMENTS.reduce((t, [re, to]) => t.replace(re, to), text); }

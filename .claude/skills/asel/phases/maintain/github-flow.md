@@ -165,10 +165,10 @@ Ana Asel flags this in autopilot when it detects two open items touching the sam
 
 The pipeline-specific steps (Plan / Dev / Gate / E2E) execute against `.claude/worktrees/<ID>`.
 
-Ana Asel prepares each Task dispatch with two reinforcing mechanisms (so a sub-agent cannot miss the worktree):
+Ana Asel prepares each Agent dispatch with two reinforcing mechanisms (so a sub-agent cannot miss the worktree):
 
-1. **Pre-dispatch cd**: Ana Asel runs `cd .claude/worktrees/<ID>` in a Bash step immediately before the Task dispatch (Agent tool inherits the parent session's cwd).
-2. **Context block** in every Task prompt:
+1. **Pre-dispatch cd**: Ana Asel runs `cd .claude/worktrees/<ID>` in a Bash step immediately before the Agent dispatch (Agent tool inherits the parent session's cwd).
+2. **Context block** in every Agent prompt:
    ```
    WORKTREE: .claude/worktrees/<ID>
    BRANCH: <branch>

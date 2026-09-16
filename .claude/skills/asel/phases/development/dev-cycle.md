@@ -45,7 +45,7 @@ For each story in ROUTEMAP (in order):
 │              STORY DEVELOPMENT CYCLE (Normal DEV Mode)            │
 │           Ana Asel manages all steps directly (1M context)       │
 │                                                                   │
-│  1. PLAN (Task: planner-prompt.md, model: "opus")                 │
+│  1. PLAN (asel-planner)                            │
 │     Agent reads story file + ALL docs (isolated context)          │
 │     Creates self-contained plan with pre-validation               │
 │     Writes plan → docs/stories/phase-N/STORY-NNN-plan.md          │
@@ -53,14 +53,14 @@ For each story in ROUTEMAP (in order):
 │     USER APPROVAL REQUIRED                                        │
 │     If feedback → re-dispatch agent with feedback                 │
 │                                                                   │
-│  2. DEV — Task-based Developer dispatch (Ana Asel direct)         │
+│  2. DEV — Agent-based Developer dispatch (Ana Asel direct)         │
 │     Read plan → extract Tasks + Context refs + Depends on         │
 │     Build dependency graph → group into waves                     │
-│     Per wave: ONE response, N parallel Task calls (sonnet)        │
+│     Per wave: ONE response, N parallel Agent calls (sonnet)        │
 │     Inter-wave typecheck (NOT Gate)                               │
 │     BLOCKED → re-dispatch with opus → still BLOCKED → user       │
 │                                                                   │
-│  3. GATE — Quality gate (Task: gate-team/lead-prompt.md, opus)    │
+│  3. GATE — Quality gate (asel-gate-lead)                          │
 │     Lead dispatches 3 scouts in parallel (CHECK):                 │
 │       • Analysis Scout (Pass 1+2+2.5+4)                           │
 │       • Test/Build Scout (Pass 3+5)                               │
@@ -73,7 +73,7 @@ For each story in ROUTEMAP (in order):
 │           → ESCALATE → present to user (3 options)                │
 │                                                                   │
 │  4. REVIEW + FINDING RESOLUTION                                    │
-│     (Task: reviewer-prompt.md, model: "sonnet")                   │
+│     (asel-reviewer)                                │
 │     Doc review + Story Impact (cond'l) + Phase 3 Finding          │
 │     Resolution. MANDATORY: zero unresolved findings before 5.     │
 │     All file edits land in the Step 5 unified commit.            │
@@ -209,8 +209,7 @@ The counter is per-story, reset when a new story starts (file is fresh per story
        - Developer does NOT read plan file — only curated context
 
        **Model selection** based on task `Complexity`:
-       - `low` or `medium` → `model: "sonnet"`
-       - `high` → `model: "opus"`
+       - `low`/`medium` → default developer agent; `high` or escalation → the model in `agents.developer.escalationModel` (asel.config.json)
        - No complexity field → default to `sonnet`
 
        Output of Phase A: N fully-prepared Developer prompts + model choices, ready to dispatch.
@@ -220,7 +219,7 @@ The counter is per-story, reset when a new story starts (file is fresh per story
        <EXTREMELY-IMPORTANT>
        Emit ALL N Agent tool calls in a SINGLE response. This is the concurrency
        point — same pattern as scout dispatch in Step 3 ("3 parallel Agent tool
-       calls in ONE response"). Sequential dispatch (one Task call per response,
+       calls in ONE response"). Sequential dispatch (one Agent call per response,
        waiting for Done before emitting the next) is a PROTOCOL VIOLATION and
        defeats wave parallelism. If the wave has 5 tasks, your response contains
        5 Agent tool_use blocks — not 1, not "one at a time".
@@ -236,7 +235,7 @@ The counter is per-story, reset when a new story starts (file is fresh per story
        - **DONE** → display `✓ Task N: [title]`
        - **DONE_WITH_CONCERNS** → display `⚠ Task N: [title] (concerns noted)`
        - **NEEDS_CONTEXT** → do NOT re-dispatch inline. Queue task for post-wave re-dispatch (Phase D).
-       - **BLOCKED** → do NOT re-dispatch inline. Queue task for post-wave re-dispatch (Phase D) with `model: "opus"`.
+       - **BLOCKED** → do NOT re-dispatch inline. Queue task for post-wave re-dispatch (Phase D) with the escalation model (`agents.developer.escalationModel`).
 
     e. **Phase D — Post-wave re-dispatch (if any NEEDS_CONTEXT/BLOCKED queued):**
 
@@ -244,7 +243,7 @@ The counter is per-story, reset when a new story starts (file is fresh per story
        AFTER the parallel wave completes. This preserves parallelism for the success
        path while allowing per-task iteration for corrections.
        - **NEEDS_CONTEXT** → Read the requested file/info, re-dispatch with added context (max 2 retries per task)
-       - **BLOCKED** → re-dispatch with `model: "opus"`. If still BLOCKED → display `⛔ Task N: [title] — BLOCKED`, present issue to user with task context.
+       - **BLOCKED** → re-dispatch with the escalation model (`agents.developer.escalationModel`). If still BLOCKED → display `⛔ Task N: [title] — BLOCKED`, present issue to user with task context.
 
     f. **Inter-wave build verification** (after ALL tasks in wave complete, including post-wave re-dispatches):
 
@@ -317,7 +316,7 @@ Gate is a MANDATORY step. You MUST dispatch the Gate Team Lead via Agent tool. A
 1. Update ROUTEMAP: Step = `Gate`
 2. Update CLAUDE.md session: Step = Gate
 3. Display progress bar (Gate step active)
-4. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls — Asel main session is the only place with Task dispatch capability; subagents cannot nest-dispatch). All use `subagent_type: "general-purpose"` and `model: "opus"`.
+4. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls — Asel main session is the only place with Agent dispatch capability; subagents cannot nest-dispatch). All use `subagent_type: "general-purpose"` and explicitly request the opus model at dispatch time (ad-hoc scouts have no agent-definition frontmatter to source a model from).
    - Scout Analysis dispatch prompt:
      ```
      You are the Analysis Scout for the Asel Gate team.
@@ -332,7 +331,7 @@ Gate is a MANDATORY step. You MUST dispatch the Gate Team Lead via Agent tool. A
    - Scout Test/Build dispatch prompt: same template but references `scout-testbuild.md` and returns `<SCOUT-TESTBUILD-FINDINGS>`.
    - Scout UI dispatch prompt: same template but references `scout-ui.md` and returns `<SCOUT-UI-FINDINGS>`. If `has_ui: false`, scout returns empty block (no-op).
 5. **Collect all 3 findings blocks.** If any scout fails, retry that scout once; if it still fails, note the gap in the Team Lead dispatch.
-6. **Dispatch Gate Team Lead** via Agent tool (`subagent_type: "general-purpose"`, `model: "opus"`):
+6. **Dispatch Gate Team Lead** via Agent tool (`subagent_type: "general-purpose"`):
    ```
    You are the Gate Team Lead. Read and follow:
    ~/{{aselRoot}}/asel-gate-lead
@@ -390,7 +389,7 @@ echo "STEP_3 GATE: EXECUTED | items=6 passes (3 scouts + lead) | evidence=docs/s
      >> docs/stories/phase-N/STORY-NNN-attempts.log
    ```
 3. Read Gate's escalation findings from `docs/stories/phase-N/STORY-NNN-gate.md`
-4. Re-dispatch Developer via Agent tool (`model: "opus"`, NOT sonnet — upgraded for difficult fixes)
+4. Re-dispatch Developer via Agent tool with the escalation model (`agents.developer.escalationModel`), not the default — upgraded for difficult fixes
    - Pass: plan file path, gate findings, project root
 5. **Append attempts.log again** (for the re-Gate dispatch):
    ```bash
@@ -443,7 +442,7 @@ If you catch yourself running `git commit -m "docs(STORY-NNN): post-review ..."`
    ```
    - `REVIEW_EXISTS` → proceed
    - `REVIEW_MISSING` → append attempts.log (`<ts> Reviewer sonnet missing-report`), re-dispatch Reviewer with explicit Write instruction
-   - Still missing → append attempts.log, re-dispatch ONE more time with `model: "opus"`
+   - Still missing → append attempts.log, re-dispatch ONE more time with an explicit opus model override
    - Still missing after 3rd attempt (attempts.log ≥ 3 entries total for this story) → mark story Step = `Escalated`, present to user: "Review agent failed to produce report after 3 attempts."
 8. Read review summary.
 9. **Do NOT commit Review's doc edits here.** Any files the Reviewer touched are staged by Step 5's unified commit.

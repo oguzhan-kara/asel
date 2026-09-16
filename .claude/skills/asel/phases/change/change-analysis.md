@@ -145,7 +145,7 @@ After approval, execute the plan step by step:
 
 1. **Direct changes first** (ADR, decisions.md, ROUTEMAP status)
 2. **Dispatch to skills in order** — invoke each skill via `Skill` tool with specific context about what to change (not full re-creation)
-3. **Dispatch Reviewer** — via `Task` tool for final consistency check
+3. **Dispatch Reviewer** — via Agent tool for final consistency check
 4. **Report results** to user
 
 ### 6. Execution Rules for Dispatched Skills

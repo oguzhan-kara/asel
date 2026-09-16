@@ -34,10 +34,10 @@ Lightest process — no plan file, no investigation. Asel handles directly (dire
 
 1. Ana Asel adds to ROUTEMAP Development Phase table:
    `FIX-NNN | quickfix | [title] | [▶] IN PROGRESS | Fix`
-2. Dispatch Developer agent (Task, model: "sonnet"):
+2. Dispatch Developer agent (Agent):
    - Context: bug description, affected file(s), NO architecture guard (pre-release)
    - Developer reads code, makes fix, runs ALL existing tests, fixes any failures
-3. Dispatch Gate agent (Task, model: "opus"):
+3. Dispatch Gate agent (Agent):
    - Verify: build passes, existing tests pass
 4. Close & Commit:
    - Commit: `fix(FIX-NNN): [title]`
@@ -59,13 +59,13 @@ Lightest process — no plan file, no investigation. Asel handles directly (dire
 Medium process — investigation + lightweight plan. Asel handles directly (direct dispatch).
 
 1. Ana Asel adds to ROUTEMAP: `FIX-NNN | bugfix | [title] | [▶] IN PROGRESS | Investigate`
-2. Dispatch Planner agent in **FIX mode** (Task, model: "opus"):
+2. Dispatch Planner agent in **FIX mode** (Agent):
    - Planner investigates: reads error description, traces code paths, finds root cause
    - Output: `docs/stories/phase-N/FIX-NNN-title.md` (lightweight fix plan)
    - Return: summary for user approval
 3. User approves fix plan (autopilot: auto-approve)
 4. Update ROUTEMAP Step = `Fix`
-5. Dispatch Developer agent (Task, model: "sonnet") — **Bug Fix TDD**:
+5. Dispatch Developer agent (Agent) — **Bug Fix TDD**:
    - Context: fix plan file, NO architecture guard (pre-release)
    - Developer follows Bug Fix TDD protocol (defined in `asel-developer`):
      a. Write a failing test that reproduces the bug
@@ -73,7 +73,7 @@ Medium process — investigation + lightweight plan. Asel handles directly (dire
      c. Implement the fix
      d. Run test → confirm it PASSES (proves fix works)
      e. Run all tests → confirm no regressions
-6. Dispatch Gate agent (Task, model: "opus"):
+6. Dispatch Gate agent (Agent):
    - Full gate: build, tests, regression
    - Gate verifies: reproduction test exists AND passes
 7. Close & Commit:

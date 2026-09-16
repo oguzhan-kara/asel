@@ -5,7 +5,10 @@ const fs = require('fs');
 const path = require('path');
 const { walk, ROOT } = require('./helpers/walk');
 
-const FORBIDDEN = ['Amil', 'amil-', '/amil', 'dev-browser', 'MultiEdit', 'Task tool', 'jq -r'];
+const FORBIDDEN = [
+  'Amil', 'amil-', '/amil', 'dev-browser', 'MultiEdit', 'Task tool', 'jq -r',
+  'model: "opus"', 'model: "sonnet"', 'Task dispatch', 'Task call', 'Task prompt', 'Task-based', '(Task,',
+];
 
 test('no stale Amil-era terms under .claude/', () => {
   const files = walk(path.join(ROOT, '.claude'), (f) => /\.(md|js|sh|json)$/.test(f));

@@ -10,7 +10,7 @@ effort: {{agents.gate-lead.effort}}
 You are the **Gate Team Lead** for Asel project orchestrator. Asel has already dispatched 3 parallel scouts (Analysis, Test/Build, UI) and collected their findings. You receive those findings in your dispatch prompt. Your job: consolidate + de-duplicate → FIX as single writer → VERIFY → REPORT.
 
 <IMPORTANT>
-**You do NOT dispatch scouts.** Subagents (which is what you are) cannot nest-dispatch Task calls. Asel orchestrator dispatches all 3 scouts in parallel from the main session, then dispatches you with their raw findings as input. This is the verified, working architecture.
+**You do NOT dispatch scouts.** Subagents (which is what you are) cannot nest-dispatch Agent calls. Asel orchestrator dispatches all 3 scouts in parallel from the main session, then dispatches you with their raw findings as input. This is the verified, working architecture.
 </IMPORTANT>
 
 ## Working Directory (WORKTREE honor rule)
@@ -352,7 +352,7 @@ Asel orchestrator (main Claude Code session, NOT you) performs scout dispatch. T
 5. Asel dispatches YOU (Team Lead / this file) with the 3 raw findings blocks concatenated in your prompt
 6. You do Phases 0-5 above and return summary to Asel
 
-**Why this split:** subagents (you) cannot nest-dispatch via Agent tool. The main session (Asel) is the only place with Task-dispatch capability. This file defines your consolidation/fix/report behavior — the scout dispatch protocol lives in `phases/development/dev-cycle.md` and `phases/development/autopilot.md` where Asel's procedure is documented.
+**Why this split:** subagents (you) cannot nest-dispatch via Agent tool. The main session (Asel) is the only place with Agent-dispatch capability. This file defines your consolidation/fix/report behavior — the scout dispatch protocol lives in `phases/development/dev-cycle.md` and `phases/development/autopilot.md` where Asel's procedure is documented.
 
 ### Sample dispatch prompt (for Asel's reference)
 

@@ -1,6 +1,6 @@
 ---
 name: asel-phase-gate
-description: Phase boundary gate: deploy, smoke, E2E, compliance; writes phase gate report.
+description: Phase boundary gate (deploy, smoke, E2E, compliance); writes the phase gate report.
 tools: Read, Grep, Glob, Bash, Write, Edit, {{playwrightPrefix}}__browser_navigate, {{playwrightPrefix}}__browser_snapshot, {{playwrightPrefix}}__browser_click, {{playwrightPrefix}}__browser_type, {{playwrightPrefix}}__browser_fill_form, {{playwrightPrefix}}__browser_take_screenshot, {{playwrightPrefix}}__browser_console_messages, {{playwrightPrefix}}__browser_wait_for, {{playwrightPrefix}}__browser_close
 model: {{agents.phase-gate.model}}
 effort: {{agents.phase-gate.effort}}

@@ -96,7 +96,7 @@ Execute Steps 1 through 2.5 from `dev-cycle.md` — same steps, same wave logic,
 Update ROUTEMAP: Step = `Gate`
 
 **First Gate dispatch:**
-1. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls, `subagent_type: "general-purpose"`, `model: "opus"`) — scout prompts reference `~/{{aselRoot}}/agents/gate-team/scout-{analysis,testbuild,ui}.md`. See `phases/development/dev-cycle.md` Step 3 for full dispatch prompt templates.
+1. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls, `subagent_type: "general-purpose"`) — scout prompts reference `~/{{aselRoot}}/agents/gate-team/scout-{analysis,testbuild,ui}.md`. See `phases/development/dev-cycle.md` Step 3 for full dispatch prompt templates.
 2. **Collect all 3 findings blocks**. Retry any failed scout once.
 3. **Dispatch Gate Team Lead** via Agent tool with story/plan paths + all 3 raw scout findings blocks embedded in prompt. Lead does merge → FIX → verify → writes `docs/stories/phase-N/STORY-NNN-gate.md` → returns summary.
    - Legacy fallback: `asel-legacy-gate` (monolithic, no team) if team architecture misbehaves.
@@ -157,7 +157,7 @@ Review runs BEFORE Commit. AUTOPILOT uses the SAME sequential protocol as Normal
    ```
    - `REVIEW_EXISTS` → proceed
    - `REVIEW_MISSING` → append attempts.log + re-dispatch Reviewer (sonnet, explicit Write instruction)
-   - Still missing → append attempts.log + re-dispatch with `model: "opus"`
+   - Still missing → append attempts.log + re-dispatch with an explicit opus model override
    - Still missing (attempts.log ≥ 3 total) → STOP autopilot, escalate to user
 3. **Do NOT commit Review's doc edits here.** They land in Step 5.
 

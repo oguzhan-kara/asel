@@ -40,7 +40,7 @@ Checkup çalışır sırası:
 7. Final Report
 ```
 
-Compliance Audit adımı **sequential** — önce infra scan tamamlanır, sonra Compliance Auditor dispatch edilir (Agent tool, `model: "opus"`). Auditor kendi içinde 7 inventory çıkarır, gap matrix üretir, auto-fix uygular, story üretir/günceller ve rapor yazar. Checkup bu raporu user'a sunar ve sonraki adımlara geçer.
+Compliance Audit adımı **sequential** — önce infra scan tamamlanır, sonra Compliance Auditor dispatch edilir (Agent tool). Auditor kendi içinde 7 inventory çıkarır, gap matrix üretir, auto-fix uygular, story üretir/günceller ve rapor yazar. Checkup bu raporu user'a sunar ve sonraki adımlara geçer.
 
 ### Step 1: Infra Scan & Report
 
