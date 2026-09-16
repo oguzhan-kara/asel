@@ -1,5 +1,12 @@
 # Architecture output: CLAUDE.md generation (reference for step-5c-architecture-output.md)
 
+### 16. CLAUDE.md Generation
+
+Generate a project-level `CLAUDE.md` for Claude Code context preservation:
+
+```markdown
+# CLAUDE.md - [Project Name]
+
 ## Project Overview
 [1-2 sentences from architecture]
 

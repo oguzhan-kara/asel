@@ -1,5 +1,12 @@
 # Architecture output templates (reference for step-5c-architecture-output.md)
 
+After architecture design is complete, generate a project `README.md` at the project root:
+
+```markdown
+# [Project Name]
+
+[1-2 sentence description]
+
 ## Tech Stack
 [Key technologies from architecture]
 
@@ -279,11 +286,4 @@ REDIS_URL=redis://localhost:6379
 NODE_ENV=development
 PORT=3000
 ```
-
-### 16. CLAUDE.md Generation
-
-Generate a project-level `CLAUDE.md` for Claude Code context preservation:
-
-```markdown
-# CLAUDE.md - [Project Name]
 

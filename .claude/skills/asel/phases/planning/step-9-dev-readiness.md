@@ -109,13 +109,6 @@ If ANY re-verification fails → fix and re-verify again (max 3 iterations).
 
 Write to `docs/reports/dev-readiness.md`:
 
-```markdown
-# Development Readiness Audit
-
-> Date: YYYY-MM-DD
-> Stories audited: N
-> Result: PASS / FAIL
-
 > Read `{{aselRoot}}/references/dev-readiness-report-template.md` now and follow it, then return here.
 ## When Complete
 

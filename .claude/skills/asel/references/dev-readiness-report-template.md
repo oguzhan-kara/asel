@@ -1,5 +1,12 @@
 # Dev-readiness report template (reference for step-9-dev-readiness.md)
 
+```markdown
+# Development Readiness Audit
+
+> Date: YYYY-MM-DD
+> Stories audited: N
+> Result: PASS / FAIL
+
 ## Per-Story Results
 | Story | A1 API | A2 DB | A3 Screen | A4 Rules | A5 AC | A6 Tests | A7 Ambig | A8 DocCov | Status |
 |-------|--------|-------|-----------|----------|-------|----------|----------|--------|

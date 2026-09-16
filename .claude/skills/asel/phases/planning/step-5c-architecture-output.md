@@ -9,13 +9,6 @@
 
 ### 13. README.md Generation
 
-After architecture design is complete, generate a project `README.md` at the project root:
-
-```markdown
-# [Project Name]
-
-[1-2 sentence description]
-
 > Read `{{aselRoot}}/references/architecture-output-templates.md` now and follow it, then return here.
 > Read `{{aselRoot}}/references/architecture-output-claudemd.md` now and follow it, then return here.
 ## Scale-Adaptive File Structure

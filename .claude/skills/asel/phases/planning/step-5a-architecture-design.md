@@ -100,9 +100,6 @@ This pattern enables Frontend-First development: all screens built with mocks in
 
 ### 2. Services & Microservices
 
-Define every service in the system. Each service gets a unique ID for story references.
-
-```markdown
 > Read `{{aselRoot}}/references/architecture-design-sections.md` now and follow it, then return here.
 ## Reference ID System
 

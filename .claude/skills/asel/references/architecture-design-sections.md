@@ -1,5 +1,8 @@
 # Architecture design sections (reference for step-5a-architecture-design.md)
 
+Define every service in the system. Each service gets a unique ID for story references.
+
+```markdown
 ## Services
 
 ### SVC-01: API Gateway
