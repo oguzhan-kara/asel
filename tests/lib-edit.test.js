@@ -7,9 +7,9 @@ const path = require('path');
 const { resolveTarget, readCurrent, proposeDocument } = require('../.claude/hooks/lib/edit');
 
 test('resolveTarget: absolute filePath returned unchanged', () => {
-  const abs = 'C:\\path\\to\\file.md';
-  const input = { cwd: '/home/user', filePath: abs };
-  assert.strictEqual(resolveTarget(input), abs);
+  const abs = path.resolve(os.tmpdir(), 'file.md');
+  const input = { cwd: '/elsewhere', filePath: abs };
+  assert.strictEqual(resolveTarget(input, 'x'), abs);
 });
 
 test('resolveTarget: relative filePath joined to cwd', () => {
