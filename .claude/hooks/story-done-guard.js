@@ -13,17 +13,20 @@ const { config } = loadConfig(input.cwd);
 const g = guard(config, 'storyDoneGuard', input.event || 'PreToolUse');
 if (!g.enabled || !/routemap/i.test(input.filePath)) finish('warn', '');
 
-const proposed = input.newString || input.content || '';
-const newDone = doneIdsIn(proposed);
-if (newDone.length === 0) finish('warn', '');
+const target = path.isAbsolute(input.filePath) ? input.filePath : path.join(input.cwd, input.filePath);
+const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : '';
 
-let oldText = input.oldString;
-if (!oldText) {
-  const rm = path.join(input.cwd, config.paths.routemap);
-  oldText = fs.existsSync(rm) ? fs.readFileSync(rm, 'utf8') : '';
+let proposed;
+if (input.tool === 'Write' || (!input.oldString && input.content)) {
+  proposed = input.content || '';
+} else {
+  if (!input.oldString || !current.includes(input.oldString)) finish('warn', ''); // Edit will fail on its own
+  const replaceAll = !!(input.raw.tool_input && input.raw.tool_input.replace_all);
+  proposed = replaceAll ? current.split(input.oldString).join(input.newString) : current.replace(input.oldString, () => input.newString);
 }
-const oldDone = new Set(doneIdsIn(oldText));
-const transitioning = newDone.filter((id) => !oldDone.has(id));
+
+const oldDone = new Set(doneIdsIn(current));
+const transitioning = doneIdsIn(proposed).filter((id) => !oldDone.has(id));
 if (transitioning.length === 0) finish('warn', '');
 
 const failures = [];

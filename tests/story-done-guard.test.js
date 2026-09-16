@@ -42,3 +42,15 @@ test('Write tool: compares against current file; passes with full evidence', () 
   const write = { hook_event_name: 'PreToolUse', tool_name: 'Write', cwd: d, tool_input: { file_path: path.join(d, 'docs/ROUTEMAP.md'), content: '| STORY-001 | A | S | [x] DONE | — |\n| STORY-002 | B | S | [x] DONE | — |\n' } };
   assert.strictEqual(runHook('story-done-guard', write).code, 0);
 });
+
+test('a surgical status-cell edit is still detected', () => {
+  const { d } = proj();
+  const r = runHook('story-done-guard', edit(d, '[~] IN PROGRESS | Commit', '[x] DONE | —'));
+  assert.strictEqual(r.code, 2);
+  assert.match(r.stderr, /STORY-002/);
+});
+
+test('an edit whose old_string is not in the file passes (Edit itself will fail)', () => {
+  const { d } = proj();
+  assert.strictEqual(runHook('story-done-guard', edit(d, 'NOT IN FILE', '| STORY-002 | B | S | [x] DONE | — |')).code, 0);
+});
