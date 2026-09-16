@@ -1,3 +1,7 @@
+---
+paths: {{rules.frontend,backend}}
+---
+
 # Naming Conventions
 
 These naming conventions apply to ALL projects. Consistency across the codebase is mandatory.

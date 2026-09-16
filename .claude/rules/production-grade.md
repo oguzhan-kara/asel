@@ -1,8 +1,3 @@
----
-description: Enforces production-grade quality in all planning and development. No MVP, no shortcuts.
-globs: *
----
-
 # Production-Grade Rule
 
 ## NEVER use MVP approach

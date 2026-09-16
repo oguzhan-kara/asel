@@ -1,3 +1,7 @@
+---
+paths: {{rules.infra}}
+---
+
 # Makefile Standards
 
 Every project MUST have a `Makefile` at the project root with these standard targets. Additional project-specific targets are allowed.

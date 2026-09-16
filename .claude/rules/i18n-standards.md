@@ -1,3 +1,7 @@
+---
+paths: {{rules.frontend,backend}}
+---
+
 # Internationalization (i18n) Standards
 
 All user-facing projects MUST be i18n-ready from day one. Retrofitting i18n is expensive.

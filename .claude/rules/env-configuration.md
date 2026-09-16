@@ -1,3 +1,7 @@
+---
+paths: {{rules.infra}}
+---
+
 # Environment Configuration
 
 All sensitive configuration MUST be managed through environment variables. No exceptions.

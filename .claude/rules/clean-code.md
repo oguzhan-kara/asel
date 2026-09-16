@@ -1,3 +1,7 @@
+---
+paths: {{rules.backend,frontend}}
+---
+
 # Clean Code Standards
 
 Code must be readable, maintainable, and well-structured. These limits prevent complexity from accumulating.

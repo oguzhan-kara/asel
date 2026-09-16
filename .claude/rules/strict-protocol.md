@@ -1,8 +1,3 @@
----
-description: Enforces strict protocol compliance. No steps skipped, no shortcuts under context pressure.
-globs: *
----
-
 # Strict Protocol Compliance
 
 <HARD-GATE>

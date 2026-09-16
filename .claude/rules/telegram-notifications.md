@@ -1,9 +1,13 @@
+---
+paths: {{paths.routemap}}
+---
+
 # Telegram Notification Rule
 
 <EXTREMELY-IMPORTANT>
 ## Hook-Driven Notifications (Deterministic)
 
-Most Telegram notifications are handled **automatically** by `hooks/notify-hook.sh`. This hook triggers on every ROUTEMAP Edit/Write and detects state changes. LLM does NOT need to send these manually.
+Most Telegram notifications are handled **automatically** by `notify-hook.js`. This hook triggers on every ROUTEMAP Edit/Write and detects state changes. LLM does NOT need to send these manually.
 
 **Hook handles:**
 
