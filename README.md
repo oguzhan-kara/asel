@@ -118,21 +118,38 @@ Claude Code loads rules under `.claude/rules/` automatically and scopes them to 
 files via the `paths:` frontmatter; a rule with no frontmatter at all is always-on. Rules
 shipped by Asel itself reference the shared `asel.config.json` glob lists via
 `{{rules.<name>}}` placeholders, but a project-specific rule can just hardcode its own glob
-array — it is never touched by `install.js` or `--check` (only files under
-`skills/`, `agents/`, `hooks/`, `rules/` that come from this repo's `.claude/` source tree
-are tracked).
+array. `install.js` never overwrites a file it did not itself render, so a project-specific
+rule is safe from being clobbered by a re-install; and `--check` only ever reports an
+*untracked* file under `skills/`, `agents/`, `hooks/`, `rules/` as `"added"` when its path
+contains `asel` (case-insensitive) — so a custom rule named e.g. `my-rules.md` is ignored by
+`--check`, but naming it something like `asel-payments.md` would cause it to show up in the
+`added` list.
 
 ## Development
 
 ```bash
 npm test                    # node --test "tests/**/*.test.js"
 npm run config:template     # regenerate asel.config.json from hooks/lib/config.js DEFAULTS
-node scripts/port-from-amil.js <AMIL_SRC_DIR> <AMIL_RULES_DIR>  # one-time Amil -> Asel port
+node scripts/port-from-amil.js <AMIL_SRC> <AMIL_RULES_DIR>  # one-time Amil -> Asel port
 ```
 
 `npm run config:template` is how `asel.config.json` at the repo root stays in sync with the
 `DEFAULTS` object in `.claude/hooks/lib/config.js` — edit `DEFAULTS`, then regenerate the
 file, rather than hand-editing both.
+
+## Line endings
+
+The repo ships a `.gitattributes` with `* text=auto eol=lf` (and `*.png`/`*.jpg` marked
+`binary`) so every checkout normalizes to LF — this matters because the fence-balance and
+frontmatter tests under `tests/` read files byte-wise, and a CRLF checkout would make every
+line in every file look "modified" relative to what's committed. If a Windows clone shows
+spurious modifications (e.g. `git status` listing files you haven't touched, or `--check`
+reporting drift that isn't real), run:
+
+```bash
+git config core.autocrlf false
+git checkout -- .
+```
 
 ## Windows note
 
