@@ -1,8 +1,13 @@
 'use strict';
 const { matchesAny } = require('./glob');
 
+// PRIMITIVE_DIR excludes UI component libraries and test utilities from HTML/XSS checks
+// (their tag definitions and wrapper implementations would otherwise self-flag).
+// .claude/hooks/lib is included because the scanner's own regex pattern definitions
+// (e.g., const XSS = /...innerHTML.../) would trigger false positives.
 const PRIMITIVE_DIR = /\/(ui|atoms|primitives)\/|ui-kit\/|^docs\/|\/__tests__\/|\.claude\/hooks\/lib\//;
 const SECRET_SKIP = /test|mock|example|fixture|seed|\.env|\.superpowers/i;
+const COMMENT_ONLY = /^\s*(\/\/.*|\{?\/\*.*?\*\/\}?\s*)$/;
 const DEBUG = {
   ts: /^\s*console\.(log|debug|info)\(/, tsx: /^\s*console\.(log|debug|info)\(/, js: /^\s*console\.(log|debug|info)\(/, jsx: /^\s*console\.(log|debug|info)\(/,
   go: /^\s*fmt\.Print(ln|f)?\(/, py: /^\s*print\(|^\s*breakpoint\(\)|^\s*import\s+pdb/,
@@ -25,7 +30,7 @@ const isReact = (e) => e === 'tsx' || e === 'jsx';
 
 function firstMatch(lines, re, skipComments = false) {
   for (let i = 0; i < lines.length; i++) {
-    if (skipComments && /^\s*(\/\/|\{\/\*|\/\*)/.test(lines[i])) continue;
+    if (skipComments && COMMENT_ONLY.test(lines[i])) continue;
     if (re.test(lines[i])) return { n: i + 1, line: lines[i].trim() };
   }
   return null;
@@ -43,20 +48,22 @@ function scanFile(file, opts, out) {
   if (lines.length > 400) warn(`${lines.length} lines — file too large, consider splitting`);
   if (DEBUG[ext] && (m = firstMatch(lines, DEBUG[ext]))) warn(at(m, 'debug statement'));
   if ((ext === 'ts' || ext === 'tsx') && (m = firstMatch(lines, /:\s*any\b|<any>|as\s+any\b/))) warn(at(m, 'any type'));
+  if (isJsLike(ext)) {
+    if ((m = firstMatch(lines, NON_SHADCN))) block(at(m, 'NON-SHADCN UI LIBRARY (use shadcn/ui from @/components/ui/)'));
+    if (!PRIMITIVE_DIR.test(rel) && (m = firstMatch(lines, NATIVE_DIALOG, true))) block(at(m, 'NATIVE BROWSER DIALOG (use ConfirmDialog/AlertDialog wrapper or toast)'));
+  }
   if (isReact(ext)) {
     if ((m = firstMatch(lines, /#[0-9a-fA-F]{3,8}\b/, true))) warn(at(m, 'hardcoded color (use design token)'));
     if ((m = firstMatch(lines, /style=\{\{?/))) warn(at(m, 'inline style (use CSS class/token)'));
     if ((m = firstMatch(lines, /-\[[0-9]+px\]/))) warn(at(m, 'arbitrary pixel value (use spacing token)'));
-    if ((m = firstMatch(lines, NON_SHADCN))) block(at(m, 'NON-SHADCN UI LIBRARY (use shadcn/ui from @/components/ui/)'));
     if (!PRIMITIVE_DIR.test(rel)) {
       if ((m = firstMatch(lines, RAW_HTML, true))) block(at(m, 'RAW HTML ELEMENT (use project wrapper: Input/Button/Select/Textarea/Dialog/Table)'));
-      if ((m = firstMatch(lines, NATIVE_DIALOG, true))) block(at(m, 'NATIVE BROWSER DIALOG (use ConfirmDialog/AlertDialog wrapper or toast)'));
     }
   }
   const secretExempt = SECRET_SKIP.test(rel) || matchesAny(rel, opts.skipPaths || []);
   if (!secretExempt && (m = firstMatch(lines, SECRET))) block(at(m, 'HARDCODED SECRET (move to env)'));
   if (SQLI[ext] && (m = firstMatch(lines, SQLI[ext]))) block(at(m, 'SQL INJECTION (use parameterized query)'));
-  if (isJsLike(ext) && !PRIMITIVE_DIR.test(rel) && (m = firstMatch(lines, XSS, true))) block(at(m, 'RAW HTML INJECTION / XSS RISK (use sanitizing wrapper component)'));
+  if (isJsLike(ext) && !PRIMITIVE_DIR.test(rel) && (m = firstMatch(lines, XSS))) block(at(m, 'RAW HTML INJECTION / XSS RISK (use sanitizing wrapper component)'));
 }
 
 function scanFiles(files, opts = {}) {

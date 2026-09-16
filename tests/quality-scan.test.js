@@ -50,7 +50,24 @@ test('skipPaths exempt secrets only, never SQL/XSS', () => {
   assert.ok(/SQL INJECTION/.test(r.blockers[0]));
 });
 
-test('hook: ignores non-commit commands, blocks on staged secret, passes when disabled', () => {
+test('a leading comment does not hide code on the same line', () => {
+  const text = ['/* noop */ el.innerHTML = html;', '/* c */ window.confirm("x");', '{/* c */} <input value={x} />', '// <input /> real comment'].join('\n');
+  const r = scanFiles([{ rel: 'src/pages/Q.tsx', text }], { skipPaths: SKIP });
+  assert.strictEqual(r.blockers.length, 3, JSON.stringify(r));
+  assert.ok(r.blockers.some((b) => /RAW HTML INJECTION/.test(b)));
+  assert.ok(r.blockers.some((b) => /NATIVE BROWSER DIALOG/.test(b)));
+  assert.ok(r.blockers.some((b) => /RAW HTML ELEMENT/.test(b)));
+});
+
+test('non-shadcn and native dialog rules apply to all js-like files, not just react', () => {
+  const text = ["import { Button } from '@mui/material';", 'if (window.confirm("y")) {}'].join('\n');
+  const r = scanFiles([{ rel: 'src/util/x.ts', text }], { skipPaths: SKIP });
+  assert.strictEqual(r.blockers.length, 2, JSON.stringify(r));
+  assert.ok(r.blockers.some((b) => /NON-SHADCN/.test(b)));
+  assert.ok(r.blockers.some((b) => /NATIVE BROWSER DIALOG/.test(b)));
+});
+
+test('hook: ignores non-commit commands, blocks on staged secret, passes when disabled; detects renamed files', () => {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'asel-'));
   execSync('git init -q && git config user.email a@b && git config user.name a', { cwd: d });
   fs.mkdirSync(path.join(d, 'src'));
@@ -61,6 +78,16 @@ test('hook: ignores non-commit commands, blocks on staged secret, passes when di
   const r = runHook('quality-scan', input('git commit -m x'), { cwd: d });
   assert.strictEqual(r.code, 2);
   assert.match(r.stderr, /HARDCODED SECRET/);
+  // Reset and test renamed file detection
+  execSync('git reset --soft HEAD~0 || true', { cwd: d });
+  execSync('git mv src/k.ts src/k2.ts', { cwd: d });
+  execSync('git add -A', { cwd: d });
+  const r2 = runHook('quality-scan', input('git commit -m y'), { cwd: d });
+  assert.strictEqual(r2.code, 2, `renamed file should still be blocked: ${r2.stderr}`);
+  assert.match(r2.stderr, /HARDCODED SECRET/);
+  // Test disabled config
+  execSync('git reset --soft HEAD~0 || true', { cwd: d });
   fs.writeFileSync(path.join(d, 'asel.config.json'), JSON.stringify({ guards: { qualityScan: { enabled: false } } }));
-  assert.strictEqual(runHook('quality-scan', input('git commit -m x'), { cwd: d }).code, 0);
+  const r3 = runHook('quality-scan', input('git commit -m z'), { cwd: d });
+  assert.strictEqual(r3.code, 0);
 });

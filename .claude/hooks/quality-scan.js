@@ -15,7 +15,7 @@ if (!g.enabled || !/git\s+commit/.test(input.command)) finish('warn', '');
 
 let staged = [];
 try {
-  staged = execSync('git diff --cached --name-only --diff-filter=ACM', { cwd: input.cwd, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
+  staged = execSync('git diff --cached --name-only --diff-filter=ACMR', { cwd: input.cwd, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
 } catch { finish('warn', ''); }
 
 const files = staged
