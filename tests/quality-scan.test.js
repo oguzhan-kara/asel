@@ -43,6 +43,13 @@ test('blockers: non-shadcn import, native dialog, XSS; primitives dir exempt fro
   assert.deepStrictEqual(r2.blockers, []);
 });
 
+test('hardcoded Telegram bot token blocks even inside a skipPaths-exempt file', () => {
+  const text = "const token = '1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi';";
+  const r = scanFiles([{ rel: 'src/__tests__/bot.js', text }], { skipPaths: SKIP });
+  assert.strictEqual(r.blockers.length, 1, JSON.stringify(r));
+  assert.ok(/HARDCODED TOKEN/.test(r.blockers[0]));
+});
+
 test('skipPaths exempt secrets only, never SQL/XSS', () => {
   const text = ["const apiKey = 'abcdefghijklmnop';", 'cursor.execute(f"SELECT {x}")'].join('\n');
   const r = scanFiles([{ rel: 'src/__tests__/x.py', text }], { skipPaths: SKIP });

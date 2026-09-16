@@ -182,7 +182,7 @@ When implementing screens/components:
   ```
   STEP_2 DEV (wave N): frontend-design INVOKED | brief=<one-line summary> | output=<file path or proposal hash> | result=PASS|FAIL
   ```
-  Example: `STEP_2 DEV (wave 3): frontend-design INVOKED | brief=Dashboard hero composition (Operations Console) | output=ui/lena-ui-shared/src/components/dashboard/hero/HeroFleetCount.tsx | result=PASS`
+  Example: `STEP_2 DEV (wave 3): frontend-design INVOKED | brief=Dashboard hero composition (Operations Console) | output=ui/shared/src/components/dashboard/hero/HeroFleetCount.tsx | result=PASS`
 - The `story-done-guard.sh` hook BLOCKS marking a UI story `[x] DONE` (story spec containing `<!-- ui-story: true -->` marker) if step-log has zero `frontend-design INVOKED` lines. Skipping the skill is a mathematical impossibility — guarded at write-time, not just discipline-time.
 
 <EXTREMELY-IMPORTANT>

@@ -216,7 +216,7 @@ After schema definition, define exactly 2 seed files:
 
 ### SEED-01: Admin Account
 - File: `seeds/001_admin_user.sql` (or equivalent ORM seed)
-- Email: `admin@aril.com`
+- Email: `admin@example.com`
 - Password: `admin` (bcrypt hashed in seed)
 - Role: admin
 - Must be idempotent (INSERT ... ON CONFLICT DO NOTHING)

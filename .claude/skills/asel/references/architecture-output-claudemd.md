@@ -34,7 +34,7 @@ Generate a project-level `CLAUDE.md` for Claude Code context preservation:
 
 ## Admin Access
 - URL: http://localhost:[port]/login
-- Email: admin@aril.com
+- Email: admin@example.com
 - Password: admin
 
 ## Project Structure

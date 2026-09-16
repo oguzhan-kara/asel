@@ -61,11 +61,11 @@ Code must be readable, maintainable, and well-structured. These limits prevent c
 - **Timeout'ta davranış: o isteği reddet, servisi ayakta tut.** Sessizce yutmak da
   sonsuza beklemek de yanlış; çağıran hata alır, thread havuza döner.
 
-**Neden bu kadar net:** `lena-api` 2026-09-10'da bu üçünün birleşiminden çöktü —
-`DashboardSseService.ensureHeaderListener` `synchronized` içinden sınırsız bekleyen bir
-abonelik çağrısı yaptı; 200/200 Tomcat thread'i o monitörde kilitlendi; SSE ile birlikte
-**tüm REST uçları** öldü, `/actuator/health` bile cevap vermedi. Yalnız restart kurtardı.
-Aynı hata iki serviste birbirinden bağımsız yazılmıştı (`DashboardSseService` +
-`MonitoringSseService`) — kural olmadığı için ikinci kez de yazıldı.
-Muhafız testler: `SseListenerRegistrationLockTest` (lena-api) ·
-`SpringChannelSubscriberTimeoutTest` (lena-cache-spring).
+**Neden bu kadar net:** bir üretim API'si tam olarak bu üçünün birleşiminden çöktü —
+bir SSE servisinin dinleyici kaydı `synchronized` içinden sınırsız bekleyen bir
+abonelik çağrısı yaptı; 200/200 istek thread'i o monitörde kilitlendi; SSE ile birlikte
+**tüm REST uçları** öldü, sağlık kontrolü uç noktası bile cevap vermedi. Yalnız restart
+kurtardı. Aynı hata iki bağımsız serviste birbirinden habersiz yazılmıştı — kural
+olmadığı için ikinci kez de yazıldı. Muhafız testler bu ikisini kalıcı olarak kapatır:
+biri dinleyici kaydının kilit altında ağ çağrısı yapmadığını doğrular, diğeri abonelik
+zaman aşımının gerçekten uygulandığını doğrular.

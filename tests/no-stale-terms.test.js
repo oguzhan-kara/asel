@@ -25,3 +25,17 @@ test('no stale Amil-era terms under .claude/', () => {
   }
   assert.deepStrictEqual(hits, []);
 });
+
+test('no stale legacy-project terms anywhere in the repo (word-boundary)', () => {
+  const EXCLUDED_DIRS = new Set(['.git', 'node_modules', '.superpowers']);
+  const SELF = path.resolve(__filename);
+  const STALE = /\b([Aa]mil|lena-[a-z]+|aril\.com)\b/;
+  const files = walk(ROOT, (f) => path.resolve(f) !== SELF, [], EXCLUDED_DIRS);
+  const hits = [];
+  for (const f of files) {
+    let text;
+    try { text = fs.readFileSync(f, 'utf8'); } catch { continue; }
+    if (STALE.test(text)) hits.push(path.relative(ROOT, f));
+  }
+  assert.deepStrictEqual(hits, []);
+});

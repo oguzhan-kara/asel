@@ -20,6 +20,7 @@ const SQLI = {
   java: /createQuery\s*\(\s*".*"\s*\+\s*|nativeQuery.*"\s*\+\s*/, kt: /createQuery\s*\(\s*".*"\s*\+\s*/, kts: /createQuery\s*\(\s*".*"\s*\+\s*/,
 };
 const SECRET = /(password|secret|api[_-]?key|private[_-]?key)\s*[:=]\s*["'][^"']{8,}/i;
+const BOT_TOKEN = /\b\d{8,10}:[A-Za-z0-9_-]{35}\b/;
 const XSS = /dangerouslySetInnerHTML|\.innerHTML\s*=|\.outerHTML\s*=|insertAdjacentHTML\s*\(|document\.write\s*\(/;
 const NON_SHADCN = /from ['"](@mui\/|antd|@chakra-ui\/|@mantine\/|react-bootstrap|@headlessui\/react)/;
 const RAW_HTML = /<(input|button|select|textarea|dialog|table)\b/;
@@ -81,6 +82,9 @@ function scanFile(file, opts, out) {
   if (!secretExempt) {
     for (const m of allMatches(lines, SECRET)) block(at(m, 'HARDCODED SECRET (move to env)'));
   }
+  // Bot-token shape (e.g. Telegram) is unambiguous enough to block everywhere,
+  // regardless of qualityScan.skipPaths or the generic SECRET_SKIP exemption.
+  for (const m of allMatches(lines, BOT_TOKEN)) block(at(m, 'HARDCODED TOKEN (move to env)'));
   if (SQLI[ext]) {
     for (const m of allMatches(lines, SQLI[ext])) block(at(m, 'SQL INJECTION (use parameterized query)'));
   }

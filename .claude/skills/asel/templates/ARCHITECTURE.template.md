@@ -144,7 +144,7 @@ Indexes:
 
 #### SEED-01: Admin Account
 - File: `seeds/001_admin_user.sql`
-- Email: `admin@aril.com`
+- Email: `admin@example.com`
 - Password: `admin` (bcrypt hashed)
 - Role: admin
 - Idempotent: INSERT ... ON CONFLICT DO NOTHING
