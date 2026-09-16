@@ -97,7 +97,7 @@ Each step follows the same pattern:
 ```
 
 <EXTREMELY-IMPORTANT>
-E2E & Polish agents (model comes from the agent definition).
+E2E & Polish agents take their model from their agent definitions (`agents.<role>.model` in asel.config.json); do not override it in the prompt.
 Each agent writes a REPORT FILE — Asel reads the report for fix dispatch, NOT the agent's raw output.
 User approval happens in main context (Asel) based on agent's summary.
 Fix loops are coordinated by Asel (not by the agent itself).

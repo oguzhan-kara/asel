@@ -45,7 +45,7 @@ For each story in ROUTEMAP (in order):
 │              STORY DEVELOPMENT CYCLE (Normal DEV Mode)            │
 │           Ana Asel manages all steps directly (1M context)       │
 │                                                                   │
-│  1. PLAN (asel-planner)                            │
+│  1. PLAN (asel-planner)                                           │
 │     Agent reads story file + ALL docs (isolated context)          │
 │     Creates self-contained plan with pre-validation               │
 │     Writes plan → docs/stories/phase-N/STORY-NNN-plan.md          │
@@ -73,7 +73,7 @@ For each story in ROUTEMAP (in order):
 │           → ESCALATE → present to user (3 options)                │
 │                                                                   │
 │  4. REVIEW + FINDING RESOLUTION                                    │
-│     (asel-reviewer)                                │
+│     (asel-reviewer)                                               │
 │     Doc review + Story Impact (cond'l) + Phase 3 Finding          │
 │     Resolution. MANDATORY: zero unresolved findings before 5.     │
 │     All file edits land in the Step 5 unified commit.            │
@@ -210,7 +210,7 @@ The counter is per-story, reset when a new story starts (file is fresh per story
 
        **Model selection** based on task `Complexity`:
        - `low`/`medium` → default developer agent; `high` or escalation → the model in `agents.developer.escalationModel` (asel.config.json)
-       - No complexity field → default to `sonnet`
+       - No complexity field → default developer agent (model from `agents.developer.model`)
 
        Output of Phase A: N fully-prepared Developer prompts + model choices, ready to dispatch.
 

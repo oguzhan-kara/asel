@@ -96,7 +96,7 @@ Execute Steps 1 through 2.5 from `dev-cycle.md` — same steps, same wave logic,
 Update ROUTEMAP: Step = `Gate`
 
 **First Gate dispatch:**
-1. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls, `subagent_type: "general-purpose"`) — scout prompts reference `~/{{aselRoot}}/agents/gate-team/scout-{analysis,testbuild,ui}.md`. See `phases/development/dev-cycle.md` Step 3 for full dispatch prompt templates.
+1. **Dispatch 3 scouts IN PARALLEL** (one response, 3 Agent tool calls, `subagent_type: "general-purpose"`) — scout prompts reference `~/{{aselRoot}}/agents/gate-team/scout-{analysis,testbuild,ui}.md` — explicitly request the opus model at dispatch time (ad-hoc scouts have no agent-definition frontmatter to source a model from). See `phases/development/dev-cycle.md` Step 3 for full dispatch prompt templates.
 2. **Collect all 3 findings blocks**. Retry any failed scout once.
 3. **Dispatch Gate Team Lead** via Agent tool with story/plan paths + all 3 raw scout findings blocks embedded in prompt. Lead does merge → FIX → verify → writes `docs/stories/phase-N/STORY-NNN-gate.md` → returns summary.
    - Legacy fallback: `asel-legacy-gate` (monolithic, no team) if team architecture misbehaves.
