@@ -176,7 +176,7 @@ Ana Asel prepares each Agent dispatch with two reinforcing mechanisms (so a sub-
    ARCHITECTURE: FROZEN (post-release — additive changes only)
    ```
 
-The agent prompts (`developer-prompt.md`, `gate-prompt.md`, `planner-prompt.md`, `e2e-tester-prompt.md`, `gate-team/lead-prompt.md`) carry a top-level directive: *"If your context block contains `WORKTREE:`, treat that path as the project root for all reads, writes, and shell commands."* This is the WORKTREE honor rule — both prompt and cwd reinforce it.
+The agent prompts (`developer-prompt.md`, `gate-prompt.md`, `planner-prompt.md`, `e2e-tester-prompt.md`, and the Gate Team Lead agent `asel-gate-lead`, dispatched by name with the Agent tool) carry a top-level directive: *"If your context block contains `WORKTREE:`, treat that path as the project root for all reads, writes, and shell commands."* This is the WORKTREE honor rule — both prompt and cwd reinforce it.
 
 The Gate agent's "Run ALL tests" pass therefore executes inside the worktree, against the new branch state, guaranteeing existing tests still pass.
 
