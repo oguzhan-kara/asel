@@ -13,7 +13,7 @@ function parseRoutemap(text) {
   for (const line of text.split(/\r?\n/)) {
     let m;
     if ((m = line.match(/^# Project Roadmap:\s*(.+?)\s*$/))) { rm.project = m[1]; continue; }
-    if ((m = line.match(/^> Current phase:\s*([A-Za-z_]+)/))) { rm.macroPhase = m[1]; continue; }
+    if ((m = line.match(/^> Current phase:\s*([A-Za-z0-9_]+)/))) { rm.macroPhase = m[1]; continue; }
     if ((m = line.match(/^## (.+?)(?:\s*\[[^\]]*\])?\s*$/))) { section = m[1].trim(); phase = null; continue; }
     if ((m = line.match(/^### Phase (\d+):\s*(.*?)\s*(?:\[([^\]]+)\])?\s*$/))) {
       phase = { number: Number(m[1]), name: m[2].trim(), status: (m[3] || '').trim(), stories: [] };
@@ -54,6 +54,16 @@ function progress(rm) {
   return { total, done, pct: total ? Math.floor((done * 100) / total) : 0 };
 }
 
+function compareIds(a, b) {
+  const na = a.match(/\d+(?:\.\d+)*/)[0].split('.').map(Number);
+  const nb = b.match(/\d+(?:\.\d+)*/)[0].split('.').map(Number);
+  for (let i = 0; i < Math.max(na.length, nb.length); i++) {
+    const d = (na[i] || 0) - (nb[i] || 0);
+    if (d) return d;
+  }
+  return a.localeCompare(b);
+}
+
 function doneIdsIn(text) {
   const ids = new Set();
   for (const line of text.split(/\r?\n/)) {
@@ -61,7 +71,7 @@ function doneIdsIn(text) {
     const m = line.match(STORY_ID);
     if (m) ids.add(m[0]);
   }
-  return [...ids].sort();
+  return [...ids].sort(compareIds);
 }
 
 module.exports = { parseRoutemap, inProgressPhase, progress, doneIdsIn, STORY_ID };

@@ -35,3 +35,12 @@ test('doneIdsIn finds ids only on DONE lines', () => {
     ['STORY-007'],
   );
 });
+
+test('macroPhase keeps digits (E2E_POLISH)', () => {
+  assert.strictEqual(parseRoutemap('> Current phase: E2E_POLISH\n').macroPhase, 'E2E_POLISH');
+});
+
+test('doneIdsIn sorts numerically', () => {
+  const t = '| STORY-10 | a | S | [x] DONE | — |\n| STORY-2 | b | S | [x] DONE | — |\n| STORY-2.1 | c | S | [x] DONE | — |';
+  assert.deepStrictEqual(doneIdsIn(t), ['STORY-2', 'STORY-2.1', 'STORY-10']);
+});
