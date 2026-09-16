@@ -1,6 +1,8 @@
 ---
 name: asel-changelog
 description: Generate technical & business changelogs from git commits, grouped by date
+user-invocable: true
+disable-model-invocation: true
 allowed-tools: Bash(git:*), Bash(ls:*), Bash(mkdir:*), Bash(wc:*), Glob, Grep, Read, Write, Edit
 ---
 

@@ -1,8 +1,8 @@
 ---
 name: asel-checkup
 description: Project health check against current Asel standards. Detects and fixes infrastructure, config, and structure issues. Run with /asel-checkup.
-user_invocable: true
-auto_trigger: false
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Asel Checkup — Project Health Check & Fix
@@ -284,62 +284,7 @@ User "evet" / "düzelt" derse, sırayla:
 
 **3.7 Bug Patterns Migration** (decisions.md → bug-patterns.md):
 
-1.8 Check `MIGRATION_NEEDED` raporladıysa uygula. Idempotent — yoksa atla, merge case'i destekler.
-
-```bash
-DEC=docs/brainstorming/decisions.md
-BP=docs/brainstorming/bug-patterns.md
-
-# 1) Migration gerekiyor mu?
-if [ ! -f "$DEC" ] || ! grep -q '^## Bug Patterns & Prevention Rules' "$DEC"; then
-  echo "NO_MIGRATION"  # Zaten migre veya hiç yoktu — atla
-  exit 0
-fi
-
-# 2) Bölümü decisions.md'den çek (başlık dahil, sonraki '## ' başlığına kadar)
-SECTION=$(awk '
-  /^## Bug Patterns & Prevention Rules[[:space:]]*$/ {capture=1; next}
-  capture && /^## / {capture=0}
-  capture {print}
-' "$DEC")
-
-# 3) bug-patterns.md'yi oluştur veya merge et
-if [ ! -f "$BP" ]; then
-  mkdir -p docs/brainstorming
-  {
-    printf '# Bug Patterns & Prevention Rules\n\n'
-    printf 'Runtime knowledge base of bugs that have occurred and rules to prevent them.\n'
-    printf 'Read by: Planner (warnings), Gate/Scouts (compliance check), Developer (awareness).\n\n'
-    printf '## Patterns\n\n'
-    printf '%s\n' "$SECTION"
-  } > "$BP"
-else
-  # Zaten varsa: SECTION'ı bug-patterns.md'nin sonuna ekle (dedup check de yap)
-  while IFS= read -r line; do
-    [ -z "$line" ] && continue
-    # Her satır için fF dedup (PAT-NNN imzasına göre)
-    if ! grep -qF "$line" "$BP" 2>/dev/null; then
-      printf '%s\n' "$line" >> "$BP"
-    fi
-  done <<< "$SECTION"
-fi
-
-# 4) decisions.md'den bölümü sil (başlık + altındaki tüm satırlar, sonraki '## ' hariç)
-awk '
-  /^## Bug Patterns & Prevention Rules[[:space:]]*$/ {skip=1; next}
-  skip && /^## / {skip=0}
-  !skip {print}
-' "$DEC" > "$DEC.tmp" && mv "$DEC.tmp" "$DEC"
-
-# 5) Doğrula
-grep -q '^## Bug Patterns & Prevention Rules' "$DEC" && echo "FAIL: section remains in decisions.md" || echo "OK: migrated"
-test -s "$BP" && echo "OK: bug-patterns.md non-empty" || echo "WARN: bug-patterns.md is empty"
-```
-
-Migration sonrası:
-- `decisions.md` → `## Bug Patterns & Prevention Rules` bölümü yok
-- `bug-patterns.md` → header + tüm pattern'lar `## Patterns` altında
-- Dosya sistemine yazıldı ama git commit kullanıcı kontrolünde
+> Read `references/checkup-bug-patterns-migration.md` now and follow it, then return here.
 
 ### Step 5: DevOps Tuning (if missing)
 
@@ -354,6 +299,16 @@ Her zaman en son çalışır:
 2. Setup Verifier Agent'ı dispatch et — Read `{{aselRoot}}/asel-setup-verifier` (global fallback: `~/{{aselRoot}}/asel-setup-verifier`)
 3. Agent raporlar → `docs/reports/setup-verification.md`
 4. FAIL olursa fix loop dene (max 2)
+
+### Step 6.5: Asel Self-Check
+
+Run and report:
+1. `node -e "console.log(require('./.claude/hooks/lib/config').loadConfig(process.cwd()).source)"` → config source
+2. `node install.js --check --project .` (from the Asel source repo, if available) → drift
+3. For each `.claude/agents/asel-*.md`: frontmatter has no `{{` (rendered)
+4. For each `.claude/rules/*.md` with frontmatter: `paths:` is a JSON array
+5. `.claude/hooks/*.js` exist for every hook named in `.claude/skills/asel/SKILL.md`
+Any failure → list under "Asel install issues" with the fix command.
 
 ### Step 7: Final Report
 

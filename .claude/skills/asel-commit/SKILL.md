@@ -1,6 +1,8 @@
 ---
 name: asel-commit
 description: Smart commit - analyze changes, group logically, generate conventional commit messages, optionally push & create PR
+user-invocable: true
+disable-model-invocation: true
 allowed-tools: Bash(git:*), Bash(gh:*), Glob, Grep, Read
 ---
 

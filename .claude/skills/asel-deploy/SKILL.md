@@ -11,9 +11,9 @@ Build and deploy the project using the Makefile in the project root.
 
 ### Step 1: Read Makefile
 
-Read the `Makefile` in the project root. If not found, STOP and inform user: "Makefile bulunamadı."
+If `Makefile` exists in the project root, read targets from it. Else if `package.json` has `build`/`start` scripts, use `npm run build && npm run start`. Else if a `docker-compose*.yml` file exists, use `docker compose build && docker compose up -d`. Else STOP and ask the user how to build/run the project.
 
-Extract available targets — focus on:
+When a `Makefile` is present, extract available targets — focus on:
 - `build` or similar (compile, bundle)
 - `up` or similar (start, run, deploy)
 - `down` or `stop`
@@ -44,23 +44,19 @@ Run in order, stop on first failure:
 
 ### Step 3: Build
 
-```bash
-make build
-```
+Run the build command determined in Step 1 (`make build`, `npm run build`, or `docker compose build`).
 
 - On SUCCESS → proceed to Step 4
 - On FAILURE → show full error output, ask user how to proceed
 
 ### Step 4: Up
 
-```bash
-make up
-```
+Run the up command determined in Step 1 (`make up`, `npm run start`, or `docker compose up -d`).
 
 Wait 5 seconds, then verify:
 
 ```bash
-make ps  # or docker compose ps
+make ps  # or docker compose ps / process check for the npm-run fallback
 ```
 
 - All containers running → proceed to Step 5
